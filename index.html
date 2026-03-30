@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sam Hung</title>
+  <meta name="description" content="Sam Hung 的個人網頁入口，收錄各項專案作品。">
+  <meta name="google-adsense-account" content="ca-pub-8095212501968358">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8095212501968358" crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:      #0d1922;
+      --text:    #E6D8C6;
+      --muted:   #7898B4;
+      --border:  #5A8AA8;
+      --card-bg: #14202E;
+      --grad-a:  #A8D0E2;
+      --grad-b:  #EAD6BC;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: clamp(1.6rem, 6vw, 2.6rem);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, var(--grad-a), var(--grad-b));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+      letter-spacing: 3px;
+      margin-bottom: 48px;
+    }
+
+    .projects {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      width: clamp(260px, 40vw, 340px);
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card:hover {
+      border-color: var(--grad-a);
+      box-shadow: 0 0 24px rgba(168,208,226,0.15);
+      transform: translateY(-3px);
+    }
+
+    .card-icon { font-size: 2rem; }
+
+    .card-title {
+      font-size: 1rem;
+      letter-spacing: 2px;
+      color: var(--grad-a);
+    }
+
+    .card-desc {
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.7;
+      letter-spacing: 0.5px;
+    }
+
+    .card-tag {
+      font-size: 0.62rem;
+      letter-spacing: 2px;
+      color: var(--border);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    footer {
+      margin-top: 56px;
+      color: var(--muted);
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+
+    footer a { color: var(--border); text-decoration: none; }
+    footer a:hover { color: var(--grad-a); }
+  </style>
+</head>
+<body>
+
+  <h1>Sam Hung</h1>
+  <p class="subtitle">Projects &amp; Experiments</p>
+
+  <div class="projects">
+
+    <a class="card" href="https://samhung7.github.io/snake-battle/" target="_blank" rel="noopener">
+      <div class="card-icon">🐍</div>
+      <div class="card-title">Snake Battle</div>
+      <div class="card-desc">
+        雙人貪食蛇對戰遊戲<br>
+        1P vs 2P、1P vs AI、AI vs AI<br>
+        支援五種語言，可加入主畫面
+      </div>
+      <div class="card-tag">Vanilla JS · Canvas · PWA</div>
+    </a>
+
+  </div>
+
+  <footer>
+    <a href="https://github.com/samhung7" target="_blank" rel="noopener">github.com/samhung7</a>
+  </footer>
+
+</body>
+</html>
