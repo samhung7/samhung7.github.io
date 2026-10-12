@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://samhung7.github.io/game-scoreboard/sitemap.xml
