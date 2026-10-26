@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Samhung Studio</title>
   <meta name="description" content="Samhung Studio：Sam Hung 的個人工作室，收錄各項專案作品。">
-  <meta name="theme-color" content="#FAFAF8">
+  <meta name="theme-color" content="#F7F5F0">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23F7F5F0' stroke='%231C1B19' stroke-width='1.5'/%3E%3Ctext x='31' y='41' text-anchor='middle' font-family='Garamond,Georgia,serif' font-style='italic' font-size='26' letter-spacing='-3' fill='%231C1B19'%3ESS%3C/text%3E%3C/svg%3E">
   <meta name="google-adsense-account" content="ca-pub-8095212501968358">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8095212501968358" crossorigin="anonymous"></script>
   <script>
@@ -26,49 +27,68 @@
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg:      #FAFAF8;
-      --surface: #FFFFFF;
-      --ink:     #1A1A1A;
-      --heading: #111111;
-      --text:    #3A3A3A;
-      --muted:   #8A8A86;
-      --line:    #E6E6E2;
-      --cta-bg:  #1A1A1A;
-      --cta-fg:  #FFFFFF;
+      --bg:      #F7F5F0;
+      --ink:     #1C1B19;
+      --heading: #161513;
+      --text:    #3B3A36;
+      --muted:   #8E8B83;
+      --line:    #DAD6CC;
+      --grain:   0.035;
       --serif:   'EB Garamond', 'Times New Roman', serif;
       --sans:    'Noto Sans', 'Noto Sans TC', -apple-system, 'Helvetica Neue', sans-serif;
+      --slow:    0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
     }
 
     :root[data-theme="dark"] {
-      --bg:      #5C5C5E;
-      --surface: #666668;
-      --ink:     #F4F4F1;
-      --heading: #F7F7F4;
-      --text:    #E6E6E2;
-      --muted:   #C6C6C2;
-      --line:    #727275;
-      --cta-bg:  #F4F4F1;
-      --cta-fg:  #3A3A3C;
+      --bg:      #4A4A48;
+      --ink:     #F3F1EB;
+      --heading: #F6F4EE;
+      --text:    #E2E0D9;
+      --muted:   #B4B1A8;
+      --line:    #63625E;
+      --grain:   0.05;
     }
 
     html { -webkit-font-smoothing: antialiased; }
 
     body {
+      position: relative;
+      min-height: 100vh;
       background: var(--bg);
       color: var(--text);
       font-family: var(--sans);
       font-weight: 300;
-      line-height: 1.8;
+      line-height: 1.85;
       letter-spacing: 0.01em;
-      transition: background 0.3s, color 0.3s;
+      transition: background var(--slow), color var(--slow);
+    }
+
+    /* Paper grain: an almost invisible noise layer, like bone vs. eggshell stock */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: var(--grain);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
     a { color: inherit; text-decoration: none; }
 
     .wrap {
-      max-width: 960px;
+      position: relative;
+      max-width: 920px;
       margin: 0 auto;
       padding: 0 24px;
+    }
+
+    .label {
+      font-family: var(--sans);
+      font-size: 0.68rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
 
     /* Nav */
@@ -76,29 +96,44 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 28px 0;
+      padding: 32px 0;
     }
 
-    .logo {
+    .brand { display: inline-flex; align-items: center; gap: 14px; color: var(--heading); }
+
+    .monogram {
+      width: 34px;
+      height: 34px;
+      border: 0.5px solid currentColor;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       font-family: var(--serif);
-      font-size: 1.25rem;
-      font-weight: 500;
-      color: var(--heading);
-      letter-spacing: 0.01em;
+      font-style: italic;
+      font-size: 0.95rem;
+      letter-spacing: -0.12em;
+      padding-right: 0.12em;
+      line-height: 1;
     }
 
-    .nav-links { display: flex; gap: 32px; font-size: 0.875rem; }
-    .nav-links a { color: var(--muted); transition: color 0.2s; }
-    .nav-links { align-items: center; }
-    .nav-links a:hover { color: var(--ink); }
+    .wordmark {
+      font-family: var(--serif);
+      font-variant: small-caps;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 10px; }
 
     .toggle {
       background: none;
-      border: 1px solid var(--line);
+      border: 0.5px solid var(--line);
       border-radius: 999px;
       color: var(--muted);
       font: inherit;
-      font-size: 0.8rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
       height: 32px;
       min-width: 32px;
       padding: 0 12px;
@@ -106,137 +141,106 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: color 0.2s, border-color 0.2s;
+      transition: color var(--slow), border-color var(--slow);
     }
     .toggle:hover { color: var(--ink); border-color: var(--muted); }
-    .toggle svg { width: 15px; height: 15px; }
+    .toggle svg { width: 14px; height: 14px; }
     .toggle .moon { display: none; }
     :root[data-theme="dark"] .toggle .sun  { display: none; }
     :root[data-theme="dark"] .toggle .moon { display: block; }
     #theme-toggle, .mail { padding: 0; }
-    .nav-links a.toggle:hover { color: var(--ink); }
 
     /* Hero */
     .hero {
       text-align: center;
-      padding: clamp(96px, 16vw, 168px) 0 clamp(80px, 12vw, 136px);
+      padding: clamp(120px, 20vw, 220px) 0 clamp(120px, 18vw, 200px);
     }
 
     h1 {
       font-family: var(--serif);
       font-weight: 400;
-      font-size: clamp(3rem, 9vw, 6rem);
-      line-height: 1.05;
+      font-size: clamp(3rem, 9vw, 6.2rem);
+      line-height: 1.02;
       letter-spacing: -0.02em;
       color: var(--heading);
     }
 
     .tagline {
-      margin-top: 24px;
-      font-size: clamp(1rem, 2.4vw, 1.125rem);
+      margin-top: 28px;
+      font-size: clamp(0.95rem, 2.2vw, 1.05rem);
       color: var(--muted);
     }
 
-    .hero-cta {
-      display: inline-block;
-      margin-top: 40px;
-      padding: 12px 28px;
-      border-radius: 999px;
-      background: var(--cta-bg);
-      color: var(--cta-fg);
-      font-size: 0.9rem;
-      font-weight: 400;
-      transition: opacity 0.2s;
-    }
-    .hero-cta:hover { opacity: 0.82; }
-
-    /* Section */
-    section { padding: 40px 0 96px; }
+    /* Projects */
+    section { padding: 0 0 160px; }
 
     .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      border-bottom: 1px solid var(--line);
-      padding-bottom: 20px;
+      padding-bottom: 18px;
+      border-bottom: 0.5px solid var(--line);
     }
 
-    h2 {
-      font-family: var(--serif);
-      font-weight: 400;
-      font-size: clamp(1.75rem, 4vw, 2.5rem);
-      color: var(--heading);
-      letter-spacing: -0.01em;
-    }
-
-    .count { font-size: 0.85rem; color: var(--muted); }
-
-    /* Project rows */
     .project {
       display: grid;
-      grid-template-columns: 64px 1fr auto;
+      grid-template-columns: 72px 1fr auto;
       gap: 24px;
-      align-items: start;
-      padding: 40px 0;
-      border-bottom: 1px solid var(--line);
-      transition: background 0.2s;
+      align-items: baseline;
+      padding: 48px 0;
+      border-bottom: 0.5px solid var(--line);
     }
 
     .num {
       font-family: var(--serif);
-      font-size: 1.1rem;
+      font-variant-numeric: oldstyle-nums;
+      font-feature-settings: 'onum' 1;
+      font-size: 1.35rem;
       color: var(--muted);
-      padding-top: 6px;
     }
 
     h3 {
       font-family: var(--serif);
       font-weight: 400;
-      font-size: clamp(1.6rem, 3.4vw, 2.1rem);
+      font-size: clamp(1.7rem, 3.4vw, 2.2rem);
+      letter-spacing: -0.01em;
       color: var(--heading);
       line-height: 1.2;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      transition: color var(--slow);
     }
 
-    .desc { font-size: 0.95rem; color: var(--text); max-width: 560px; }
+    .desc { font-size: 0.93rem; color: var(--text); max-width: 540px; }
 
-    .tag {
-      margin-top: 14px;
-      font-size: 0.75rem;
-      color: var(--muted);
-      letter-spacing: 0.06em;
-    }
+    .tag { margin-top: 18px; }
 
     .arrow {
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       color: var(--muted);
-      padding-top: 6px;
-      transition: transform 0.25s, color 0.2s;
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: opacity var(--slow), transform var(--slow), color var(--slow);
     }
 
-    .project:hover .arrow { transform: translateX(6px); color: var(--ink); }
+    .project:hover .arrow { opacity: 1; transform: translateX(0); color: var(--ink); }
     .project:hover h3 { font-style: italic; }
 
     /* Footer */
     footer {
-      border-top: 1px solid var(--line);
-      padding: 40px 0 56px;
+      border-top: 0.5px solid var(--line);
+      padding: 36px 0 56px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       flex-wrap: wrap;
       gap: 12px;
-      font-size: 0.85rem;
-      color: var(--muted);
     }
 
-    footer .logo { font-size: 1.05rem; }
+    footer a { transition: color var(--slow); }
     footer a:hover { color: var(--ink); }
 
     @media (max-width: 600px) {
-      .project { grid-template-columns: 40px 1fr; gap: 16px; padding: 32px 0; }
+      .wordmark { display: none; }
+      .project { grid-template-columns: 44px 1fr; gap: 16px; padding: 40px 0; }
       .arrow { display: none; }
-      .nav-links { gap: 12px; }
-      .nav-links .hide-sm { display: none; }
+      section { padding-bottom: 112px; }
     }
   </style>
 </head>
@@ -245,15 +249,16 @@
   <div class="wrap">
 
     <nav>
-      <a class="logo" href="/">Samhung Studio</a>
+      <a class="brand" href="/" aria-label="Samhung Studio">
+        <span class="monogram">SS</span>
+        <span class="wordmark">Samhung Studio</span>
+      </a>
       <div class="nav-links">
-        <a class="hide-sm" href="#projects" data-i18n="navProjects">Projects</a>
-        <a class="hide-sm" href="https://github.com/samhung7" target="_blank" rel="noopener">GitHub</a>
-        <a class="toggle mail" href="mailto:samhungstudio@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></a>
+        <a class="toggle mail" href="mailto:samhungstudio@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></a>
         <button class="toggle" id="lang-toggle" type="button" aria-label="Switch language">EN</button>
         <button class="toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">
-          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         </button>
       </div>
     </nav>
@@ -261,13 +266,11 @@
     <header class="hero">
       <h1>Samhung Studio</h1>
       <p class="tagline" data-i18n="tagline">小而好用的工具與遊戲，從瀏覽器開始。</p>
-      <a class="hero-cta" href="#projects" data-i18n="cta">瀏覽作品</a>
     </header>
 
     <section id="projects">
       <div class="section-head">
-        <h2 data-i18n="projects">Projects</h2>
-        <span class="count">03</span>
+        <h2 class="label" data-i18n="projects">Selected Works</h2>
       </div>
 
       <a class="project" href="https://stoatalk.app/" target="_blank" rel="noopener">
@@ -275,7 +278,7 @@
         <div>
           <h3>StoaTalk</h3>
           <p class="desc" data-i18n="stoa">免註冊匿名討論，用代碼或連結加入。公開議廊與端對端加密的私人沙龍，內建競答、投票、便利貼，支援九種語言。</p>
-          <p class="tag">Vanilla JS · Firebase · Cloudflare</p>
+          <p class="tag label">Vanilla JS · Firebase · Cloudflare</p>
         </div>
         <span class="arrow">→</span>
       </a>
@@ -285,7 +288,7 @@
         <div>
           <h3>Game Scoreboard</h3>
           <p class="desc" data-i18n="scoreboard">比賽記分板：籃球、羽球、排球、網球、匹克球、桌球。計時、發球權、換場自動處理，內建 DJ 音效與 Spotify，支援五種語言。</p>
-          <p class="tag">Vanilla JS · Web Audio · PWA</p>
+          <p class="tag label">Vanilla JS · Web Audio · PWA</p>
         </div>
         <span class="arrow">→</span>
       </a>
@@ -295,15 +298,15 @@
         <div>
           <h3>Snake Battle</h3>
           <p class="desc" data-i18n="snake">雙人貪食蛇對戰遊戲，支援 1P vs 2P、1P vs AI、AI vs AI。支援五種語言，可加入主畫面。</p>
-          <p class="tag">Vanilla JS · Canvas · PWA</p>
+          <p class="tag label">Vanilla JS · Canvas · PWA</p>
         </div>
         <span class="arrow">→</span>
       </a>
     </section>
 
     <footer>
-      <span class="logo">Samhung Studio</span>
-      <span>© 2026 Sam Hung · <a href="https://github.com/samhung7" target="_blank" rel="noopener">github.com/samhung7</a></span>
+      <span class="label">© 2026 Samhung Studio</span>
+      <a class="label" href="https://github.com/samhung7" target="_blank" rel="noopener">GitHub</a>
     </footer>
 
   </div>
@@ -315,10 +318,8 @@
         zh: {
           title: 'Samhung Studio',
           description: 'Samhung Studio：Sam Hung 的個人工作室，收錄各項專案作品。',
-          navProjects: 'Projects',
           tagline: '小而好用的工具與遊戲，從瀏覽器開始。',
-          cta: '瀏覽作品',
-          projects: 'Projects',
+          projects: 'Selected Works',
           snake: '雙人貪食蛇對戰遊戲，支援 1P vs 2P、1P vs AI、AI vs AI。支援五種語言，可加入主畫面。',
           scoreboard: '比賽記分板：籃球、羽球、排球、網球、匹克球、桌球。計時、發球權、換場自動處理，內建 DJ 音效與 Spotify，支援五種語言。',
           stoa: '免註冊匿名討論，用代碼或連結加入。公開議廊與端對端加密的私人沙龍，內建競答、投票、便利貼，支援九種語言。',
@@ -327,10 +328,8 @@
         en: {
           title: 'Samhung Studio',
           description: 'Samhung Studio: the personal studio of Sam Hung, a collection of projects.',
-          navProjects: 'Projects',
           tagline: 'Small, useful tools and games, right in your browser.',
-          cta: 'View projects',
-          projects: 'Projects',
+          projects: 'Selected Works',
           snake: 'A two-player snake battle game: 1P vs 2P, 1P vs AI, or AI vs AI. Available in five languages and installable to your home screen.',
           scoreboard: 'A scoreboard for basketball, badminton, volleyball, tennis, pickleball and table tennis. Handles timing, serve and side changes automatically, with built-in DJ sounds and Spotify. Available in five languages.',
           stoa: 'Anonymous discussion with no sign-up: join with a code or link. Public halls and end-to-end encrypted private salons, with quizzes, polls and sticky notes. Available in nine languages.',
