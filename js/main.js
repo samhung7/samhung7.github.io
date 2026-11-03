@@ -9,6 +9,9 @@
       snake: '雙人貪食蛇對戰遊戲，支援 1P vs 2P、1P vs AI、AI vs AI。支援五種語言，可加入主畫面。',
       scoreboard: '比賽記分板：籃球、羽球、排球、網球、匹克球、桌球。計時、發球權、換場自動處理，內建 DJ 音效與 Spotify，支援五種語言。',
       stoa: '免註冊匿名討論，用代碼或連結加入。公開議廊與端對端加密的私人沙龍，內建競答、投票、便利貼，支援九種語言。',
+      blog: 'Blog',
+      journal: 'Journal',
+      allPosts: '所有文章 →',
       langBtn: 'EN'
     },
     en: {
@@ -19,6 +22,9 @@
       snake: 'A two-player snake battle game: 1P vs 2P, 1P vs AI, or AI vs AI. Available in five languages and installable to your home screen.',
       scoreboard: 'A scoreboard for basketball, badminton, volleyball, tennis, pickleball and table tennis. Handles timing, serve and side changes automatically, with built-in DJ sounds and Spotify. Available in five languages.',
       stoa: 'Anonymous discussion with no sign-up: join with a code or link. Public halls and end-to-end encrypted private salons, with quizzes, polls and sticky notes. Available in nine languages.',
+      blog: 'Blog',
+      journal: 'Journal',
+      allPosts: 'All posts →',
       langBtn: '中'
     }
   };
@@ -33,6 +39,7 @@
     });
     document.querySelector('meta[name="description"]').setAttribute('content', t.description);
     document.getElementById('lang-toggle').textContent = t.langBtn;
+    document.dispatchEvent(new CustomEvent('langchange'));
   }
 
   var lang = d.getAttribute('lang') === 'en' ? 'en' : 'zh';

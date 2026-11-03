@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /blog/editor/
 
+Sitemap: https://samhungstudio.com/sitemap.xml
 Sitemap: https://samhung7.github.io/game-scoreboard/sitemap.xml
