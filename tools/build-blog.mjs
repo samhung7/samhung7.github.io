@@ -23,7 +23,12 @@ const res = await fetch(url, { method: "POST", headers: { "content-type": "appli
   ] } },
   orderBy: [{ field: { fieldPath: "publishAt" }, direction: "DESCENDING" }],
 } }) });
-if (!res.ok) throw new Error(`Firestore ${res.status}: ${await res.text()}`);
+if (!res.ok) {
+  const why = await res.text();
+  // the rules not deployed yet, or the index still building: nothing to build yet, and not worth a failed run every 30 minutes
+  if (/PERMISSION_DENIED|FAILED_PRECONDITION/.test(why)) { console.log(`::warning::Firestore ${res.status}: rules or index not ready yet`); process.exit(0); }
+  throw new Error(`Firestore ${res.status}: ${why}`);
+}
 const val = (v) => v == null ? null : "stringValue" in v ? v.stringValue : "timestampValue" in v ? new Date(v.timestampValue)
   : "arrayValue" in v ? (v.arrayValue.values || []).map(val) : null;
 const posts = (await res.json()).filter((r) => r.document).map(({ document: d }) => ({
