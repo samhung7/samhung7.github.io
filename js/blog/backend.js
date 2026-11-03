@@ -53,6 +53,12 @@ async function firebaseBackend() {
     async whoami() { await authReady; return user && { uid: user.uid, name: user.displayName, email: user.email, owner: user.uid === CONFIG.ownerUid }; },
     async signIn() { await A.signInWithPopup(auth, new A.GoogleAuthProvider()); return this.whoami(); },
     async signOut() { await A.signOut(auth); },
+    async putImage(bytes, name) {
+      const res = await fetch(`${CONFIG.images.api}/img/${name}`, { method: "PUT", body: bytes,
+        headers: { Authorization: "Bearer " + (await auth.currentUser.getIdToken()), "Content-Type": "image/jpeg" } });
+      if (!res.ok) throw new Error("upload " + res.status);
+      return `${CONFIG.images.host}/img/${name}`;
+    },
   };
 }
 
@@ -77,6 +83,11 @@ function demoBackend() {
     async whoami() { return { uid: "demo", name: "Sam", owner: true }; },
     async signIn() { return this.whoami(); },
     async signOut() {},
+    demo: true,
+    async putImage(bytes) { // kept inside the post itself; fine for trying things out, not for real posts
+      let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      return "data:image/jpeg;base64," + btoa(s);
+    },
   };
 }
 function seed() {

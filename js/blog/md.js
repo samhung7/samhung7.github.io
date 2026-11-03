@@ -7,6 +7,8 @@
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ESC[c]);
 
+// a picture may also be a data: image (demo mode keeps pictures inside the post); an <img> never runs it
+const safeImg = (u) => (/^data:image\/(jpeg|png|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(String(u).trim()) ? String(u).trim() : safeUrl(u));
 const safeUrl = (u) => {
   u = String(u || "").trim();
   if (/^(https?:|mailto:)/i.test(u) || /^\/(?!\/)/.test(u) || /^#/.test(u)) return u;
@@ -21,7 +23,7 @@ export function inline(src) {
   while ((m = re.exec(s))) {
     out += esc(s.slice(last, m.index));
     if (m[1] != null) out += `<code>${esc(m[1])}</code>`;
-    else if (m[3] != null) { const u = safeUrl(m[3]); out += u ? `<img src="${esc(u)}" alt="${esc(m[2])}" loading="lazy">` : esc(m[0]); }
+    else if (m[3] != null) { const u = safeImg(m[3]); out += u ? `<img src="${esc(u)}" alt="${esc(m[2])}" loading="lazy">` : esc(m[0]); }
     else if (m[5] != null) { const u = safeUrl(m[5]); out += u ? `<a href="${esc(u)}"${/^https?:/i.test(u) ? ' target="_blank" rel="noopener"' : ""}>${inline(m[4])}</a>` : esc(m[0]); }
     else if (m[6] != null) out += `<strong>${inline(m[6])}</strong>`;
     else if (m[7] != null) out += `<em>${inline(m[7])}</em>`;
@@ -55,7 +57,7 @@ export function render(text) {
     if ((x = m.match(/^(#{1,3})\s+(.*)$/))) { end(); const h = x[1].length + 1; out.push(`<h${h}>${inline(x[2])}</h${h}>`); continue; }
     if (/^(-{3,}|\*{3,})$/.test(m)) { end(); out.push("<hr>"); continue; }
     if ((x = m.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/))) {
-      end(); const u = safeUrl(x[2]);
+      end(); const u = safeImg(x[2]);
       if (u) out.push(`<figure><img src="${esc(u)}" alt="${esc(x[1])}" loading="lazy">${x[1] ? `<figcaption>${esc(x[1])}</figcaption>` : ""}</figure>`);
       continue;
     }

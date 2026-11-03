@@ -7,6 +7,7 @@ import { render, readMinutes } from "./md.js";
 import { t, fmtDate } from "./i18n.js";
 import { fill, initChrome, onLang, h, toast, demoBanner, postUrl } from "./chrome.js";
 import { CONFIG } from "./config.js";
+import { uploadImage } from "./images.js";
 
 initChrome();
 if (demo) demoBanner();
@@ -170,6 +171,30 @@ function editor(p) {
     const md = img ? `${st && ta.value[st - 1] !== "\n" ? "\n" : ""}![${sel || t("image")}](${url})\n` : `[${sel || t("link")}](${url})`;
     ta.setRangeText(md, st, en, "end"); ta.focus(); changed();
   }
+  // pictures: from the toolbar, pasted, or dropped on the text. Each gets a line saying it's on its way, swapped for
+  // the real one when the upload is done (or taken out if it fails)
+  const file = h("input", { type: "file", accept: "image/*", multiple: true, hidden: true });
+  let upN = 0;
+  async function addImages(files) {
+    files = [...files].filter((f) => f.type.startsWith("image/"));
+    for (const f of files) {
+      const mark = `![${t("uploading")}](#up${++upN})`, st = ta.selectionEnd, before = ta.value.slice(0, st);
+      ta.setRangeText(`${before && !before.endsWith("\n") ? "\n" : ""}${mark}\n`, st, st, "end"); changed();
+      try {
+        const url = await uploadImage(f);
+        ta.value = ta.value.replace(mark, `![](${url})`); // what goes between [ ] shows as its caption
+      } catch (e) {
+        console.warn(e); toast(t("uploadFail"));
+        ta.value = ta.value.replace(mark + "\n", "").replace(mark, "");
+      }
+      changed();
+    }
+  }
+  file.addEventListener("change", () => { const f = [...file.files]; file.value = ""; addImages(f); });
+  ta.addEventListener("paste", (e) => { const f = [...(e.clipboardData?.files || [])]; if (f.some((x) => x.type.startsWith("image/"))) { e.preventDefault(); addImages(f); } });
+  ta.addEventListener("dragover", (e) => { if ([...(e.dataTransfer?.items || [])].some((i) => i.kind === "file")) { e.preventDefault(); ta.classList.add("drop"); } });
+  ta.addEventListener("dragleave", () => ta.classList.remove("drop"));
+  ta.addEventListener("drop", (e) => { ta.classList.remove("drop"); const f = [...(e.dataTransfer?.files || [])]; if (f.length) { e.preventDefault(); addImages(f); } });
   const ico = (d) => { const e = document.createElementNS("http://www.w3.org/2000/svg", "svg"); e.setAttribute("viewBox", "0 0 24 24"); e.innerHTML = d; return e; };
   const tool = (label, txt, fn, cls = "") => h("button", { type: "button", class: "tool " + cls, "aria-label": t(label), title: t(label), "data-tool": "1", onclick: fn }, txt);
   const prevBtn = h("button", { type: "button", class: "btn small", onclick: togglePreview }, t("preview"));
@@ -177,7 +202,7 @@ function editor(p) {
     tool("bold", "B", () => wrap("**", "**", t("bold")), "b"), tool("italic", "I", () => wrap("*", "*", t("italic")), "i"),
     tool("heading", "H", () => prefix("## ")), tool("list", "•", () => prefix("- ")), tool("numList", "1.", () => prefix("1. ")),
     tool("quote", "❝", () => prefix("> ")), tool("code", "</>", () => wrap("`", "`", "code")), tool("link", ico('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'), () => link(false)),
-    tool("image", ico('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 18 5.5-5 4 3.5 2.5-2 4 3.5"/>'), () => link(true)),
+    tool("image", ico('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 18 5.5-5 4 3.5 2.5-2 4 3.5"/>'), () => file.click()),
     h("span", { class: "grow" }), prevBtn);
   function togglePreview() {
     previewing = !previewing;
@@ -239,7 +264,7 @@ function editor(p) {
       h("div", { class: "row" }, p ? h("span", { class: "status " + statusOf(p) }, t(statusOf(p))) : null,
         p && p.status === "published" ? h("a", { class: "btn small", href: postUrl(p.slug), target: "_blank" }, t("view")) : null)),
     h("div", { class: "ed-grid" },
-      h("div", { class: "ed-main" }, title, toolbar, ta, pv, h("div", { class: "ed-foot" }, count, note,
+      h("div", { class: "ed-main" }, title, toolbar, ta, pv, file, h("div", { class: "ed-foot" }, count, note,
         restored ? h("button", { class: "linkish label", type: "button", onclick: async (e) => {
           store.set(LOCAL(p?.slug), null); e.target.remove(); title.value = orig.title; ta.value = orig.body; s.tags = [...orig.tags]; slugIn.value = orig.slug; drawTags(); changed(); dirty = false; note.textContent = "";
         } }, t("localDrop")) : null)),

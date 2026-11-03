@@ -206,3 +206,4 @@ dialog.sheet .field { margin-top: 10px; }
 .post-mini .num { font-size: 1rem; }
 .post-mini h3 { font-size: clamp(1.35rem, 2.6vw, 1.7rem); margin-bottom: 8px; }
 @media (max-width: 600px) { .post-mini { grid-template-columns: 1fr; gap: 6px; } }
+.ed-body.drop { outline: 0.5px dashed var(--muted); outline-offset: 6px; }
