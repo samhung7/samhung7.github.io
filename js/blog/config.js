@@ -13,7 +13,7 @@ export const CONFIG = {
     messagingSenderId: "381227398897",
     appId: "1:381227398897:web:b078ffb56ab36459471b50",
   },
-  ownerUid: "",
+  ownerUid: "CErdnTY8wXfBli0dF8X93kTXXGp2",
   images: { api: "https://blog-api.samhungstudio.com", host: "https://img.samhungstudio.com" },
   site: "https://samhungstudio.com",
 };

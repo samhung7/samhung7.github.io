@@ -4,7 +4,7 @@ rules_version = '2';
 // (also ownerUid in js/blog/config.js). Deploy: firebase deploy --only firestore
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isOwner() { return request.auth != null && request.auth.uid == 'OWNER_UID'; }
+    function isOwner() { return request.auth != null && request.auth.uid == 'CErdnTY8wXfBli0dF8X93kTXXGp2'; }
     function validPost(d) {
       return d.keys().hasOnly(['title', 'body', 'tags', 'status', 'publishAt', 'createdAt', 'updatedAt'])
         && d.title is string && d.title.size() > 0 && d.title.size() <= 120

@@ -13,5 +13,5 @@ bucket_name = "samhung-blog"
 
 [vars]
 PROJECT_ID = "samhung-studio"        # the blog's Firebase project id (js/blog/config.js)
-OWNER_UID = "OWNER_UID"              # the same id as in firestore.rules
+OWNER_UID = "CErdnTY8wXfBli0dF8X93kTXXGp2"            # the same id as in firestore.rules
 ORIGINS = "https://samhungstudio.com,https://samhung7.github.io"
