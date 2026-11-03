@@ -2,7 +2,11 @@
    samhung-blog, which is public at img.samhungstudio.com. Only the owner (OWNER_UID, the same id as in firestore.rules)
    may upload. A picture is a JPEG the editor has already shrunk, named by its own SHA-256 (the first 22 base64url
    characters), so the same picture is stored once and a name never changes what it points to.
-   PUT /img/<hash>.jpg   body: the JPEG, Authorization: Bearer <Firebase ID token>   → 201 (or 200 when it was there) */
+   PUT /img/<hash>.jpg   body: the JPEG, Authorization: Bearer <Firebase ID token>   → 201 (or 200 when it was there)
+   POST /rebuild         the editor, right after publishing: asks GitHub to run .github/workflows/blog.yml now, so the
+                         post's static page (link previews) is up within a minute or two instead of waiting for a schedule.
+   The cron does the same every 15 minutes, which also brings scheduled posts' pages up soon after their time
+   (GitHub's own schedule runs late or not at all). Both need the DISPATCH_TOKEN secret. */
 import { verifier } from "./token.js";
 
 const MAX = 3 * 1024 * 1024;
@@ -10,15 +14,31 @@ const NAME = /^([A-Za-z0-9_-]{22})\.jpg$/;
 const CACHE = "public, max-age=31536000, immutable";
 const b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
-export function makeHandler({ verify }) {
+// ask GitHub to run the blog's page build now; false without the token or when GitHub says no
+export async function dispatch(env, fetcher = (...a) => fetch(...a)) {
+  if (!env.DISPATCH_TOKEN || !env.GITHUB_REPO) return false;
+  const res = await fetcher(`https://api.github.com/repos/${env.GITHUB_REPO}/actions/workflows/blog.yml/dispatches`, { method: "POST",
+    headers: { Authorization: "Bearer " + env.DISPATCH_TOKEN, Accept: "application/vnd.github+json", "Content-Type": "application/json", "User-Agent": "samhung-blog-images" },
+    body: JSON.stringify({ ref: "main" }) });
+  if (!res.ok) console.error("blog dispatch: " + res.status);
+  return res.ok;
+}
+
+export function makeHandler({ verify, fetcher = (...a) => fetch(...a) }) {
   return async (req, env) => {
     const origin = req.headers.get("Origin");
     const ok = !!origin && (env.ORIGINS || "").split(",").map((o) => o.trim()).includes(origin);
     const cors = ok ? { "Access-Control-Allow-Origin": origin, Vary: "Origin" } : {};
     const out = (status) => new Response(null, { status, headers: cors });
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...cors,
-      "Access-Control-Allow-Methods": "PUT", "Access-Control-Allow-Headers": "Authorization, Content-Type", "Access-Control-Max-Age": "86400" } });
+      "Access-Control-Allow-Methods": "PUT, POST", "Access-Control-Allow-Headers": "Authorization, Content-Type", "Access-Control-Max-Age": "86400" } });
     const parts = new URL(req.url).pathname.split("/").filter(Boolean);
+    if (req.method === "POST" && parts.length === 1 && parts[0] === "rebuild") {
+      const uid = await verify((req.headers.get("Authorization") || "").replace(/^Bearer /, ""), env);
+      if (!uid) return out(401);
+      if (!env.OWNER_UID || uid !== env.OWNER_UID) return out(403);
+      return out((await dispatch(env, fetcher)) ? 202 : 503);
+    }
     if (req.method !== "PUT" || parts.length !== 2 || parts[0] !== "img") return out(404);
     const m = NAME.exec(parts[1]);
     if (!m) return out(400);
@@ -37,4 +57,4 @@ export function makeHandler({ verify }) {
   };
 }
 
-export default { fetch: makeHandler({ verify: verifier() }) };
+export default { fetch: makeHandler({ verify: verifier() }), scheduled: (event, env) => dispatch(env) };

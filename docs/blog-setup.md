@@ -37,6 +37,9 @@ Worker 只收 `OWNER_UID` 的上傳，做法跟 StoaTalk 的照片服務一樣�
 4. 到 GitHub repo 的 **Settings → Secrets and variables → Actions** 新增：
    - `CLOUDFLARE_API_TOKEN`：上一步的 token
    - `CLOUDFLARE_ACCOUNT_ID`：Cloudflare dashboard 右側的 Account ID
+   - `DISPATCH_TOKEN`：GitHub → Settings → Developer settings → **Fine-grained tokens** → Generate，Repository access 只選這個 repo，
+     Permissions → **Actions: Read and write**。有了它，發佈文章後一兩分鐘內就會產生分享預覽頁；預約的文章最晚 15 分鐘內。
+     （GitHub 自己的排程常常延遲甚至不跑，所以改由這支 Worker 來觸發。）
 5. `worker/wrangler.toml` 的 `PROJECT_ID` 和 `OWNER_UID` 要填上 Firebase 專案 ID 和你的使用者 ID（給我，我來改）。
    合併到 main 後，Actions 的「Deploy picture service」會自動部署到 `blog-api.samhungstudio.com`。
 
@@ -45,7 +48,7 @@ Worker 只收 `OWNER_UID` 的上傳，做法跟 StoaTalk 的照片服務一樣�
 - **草稿**：`status: "draft"`，只有你看得到。編輯時內容也會每 0.8 秒暫存在這台裝置，關掉分頁也不會掉（跟 StoaTalk 長文一樣）。
 - **預約發佈**：`status: "published"` 加上未來的 `publishAt`。規則讓其他人在那個時間之前讀不到，時間到就自動出現，不需要伺服器排程。
 - **網址**：`/blog/<網址>/`。發佈後就固定。GitHub Pages 找不到檔案時會給 `404.html`，它就是文章頁，所以新文章發佈後立刻能看。
-- **分享預覽**：`.github/workflows/blog.yml` 每 30 分鐘跑 `tools/build-blog.mjs`，替每篇已發佈的文章產生 `blog/<網址>/index.html`（含標題、摘要、第一張圖的 og 標籤）和 `sitemap.xml`，讓 LINE、Facebook、X、Threads 貼上連結時有預覽。也可以在 Actions 頁面手動執行。
+- **分享預覽**：發佈後由圖片服務觸發（沒設定時退回 GitHub 每 30 分鐘的排程），`.github/workflows/blog.yml` 跑 `tools/build-blog.mjs`，替每篇已發佈的文章產生 `blog/<網址>/index.html`（含標題、摘要、第一張圖的 og 標籤；沒有圖就用 `icons/og-default.png` 這張預設預覽圖）和 `sitemap.xml`，讓 LINE、Facebook、X、Threads 貼上連結時有預覽。也可以在 Actions 頁面手動執行。
 - **圖片**：上傳後在文字裡是一行 `![](圖片網址)`，`[ ]` 裡寫的字會成為圖說。第一張圖也會當分享預覽的封面。刪掉文字裡的圖片不會刪 R2 的檔案（同一張圖只存一份）。
 - **Markdown**：`#`/`##`/`###` 標題、`**粗體**`、`*斜體*`、`` `程式碼` ``、``` 區塊、`- ` 與 `1. ` 清單、`> ` 引用、`---` 分隔線、`[文字](網址)`、`![說明](圖片網址)`。所有文字都會被跳脫，不會執行 HTML。
 - **快捷鍵**：編輯器裡 ⌘/Ctrl+S 儲存、⌘/Ctrl+B 粗體、⌘/Ctrl+I 斜體。

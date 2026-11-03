@@ -306,6 +306,7 @@ function editor(p) {
       else if (slug !== p.slug) { await B.create(slug, { ...data, createdAt: p.createdAt }); await B.remove(p.slug); } // a draft's new address
       else await B.update(slug, data);
       store.set(LOCAL(p?.slug), null); dirty = false;
+      if (status === "published" || p?.status === "published") B.rebuild(); // its link preview, up to date
       toast(status === "draft" ? t("saved") : p && isLive(p) ? t("updatedOk") : when === "later" ? t("scheduledOk", { d: fmtDate(publishAt, true) }) : t("publishedOk"));
       document.removeEventListener("keydown", onKey);
       const fresh = await B.get(slug);

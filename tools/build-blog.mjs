@@ -45,10 +45,11 @@ for (const p of posts) {
     `<link rel="canonical" href="${esc(link)}">`,
     `<meta property="og:type" content="article">`, `<meta property="og:site_name" content="Samhung Studio">`,
     `<meta property="og:title" content="${esc(p.title)}">`, `<meta property="og:description" content="${esc(desc)}">`,
-    `<meta property="og:url" content="${esc(link)}">`, `<meta property="og:image" content="${esc(img || CONFIG.site + "/icons/icon-192.png")}">`,
+    `<meta property="og:url" content="${esc(link)}">`, `<meta property="og:image" content="${esc(img || CONFIG.site + "/icons/og-default.png")}">`,
+    ...(img ? [] : [`<meta property="og:image:width" content="1200">`, `<meta property="og:image:height" content="630">`]),
     `<meta property="article:published_time" content="${p.publishAt.toISOString()}">`,
     ...p.tags.map((t) => `<meta property="article:tag" content="${esc(t)}">`),
-    `<meta name="twitter:card" content="${img ? "summary_large_image" : "summary"}">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
   ].join("\n  ");
   const article = `<a class="label back" href="/blog/">← 所有文章</a>
         <header class="post-head"><h1>${esc(p.title)}</h1>
@@ -58,7 +59,7 @@ for (const p of posts) {
   const html = tpl.replace("<!DOCTYPE html>", "<!DOCTYPE html>\n" + MARK)
     .replace(/<title>.*?<\/title>/, `<title>${esc(p.title)} · Samhung Studio</title>`)
     .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc(desc)}">`)
-    .replace("<!--og-->", og).replace("<!--post-->", article);
+    .replace(/<!--og-->[\s\S]*?<!--\/og-->/, og).replace("<!--post-->", article);
   const dir = path.join(ROOT, "blog", p.slug), file = path.join(dir, "index.html");
   fs.mkdirSync(dir, { recursive: true });
   if (!fs.existsSync(file) || fs.readFileSync(file, "utf8") !== html) { fs.writeFileSync(file, html); console.log("wrote", p.slug); }
