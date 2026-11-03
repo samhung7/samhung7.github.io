@@ -1,0 +1,17 @@
+# The blog's picture service (src/index.js): a Cloudflare Worker at blog-api.samhungstudio.com in front of the R2 bucket
+# samhung-blog, public at img.samhungstudio.com (R2 → the bucket → Settings → Custom Domains). Deployed by
+# .github/workflows/worker.yml with the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets. Setup: docs/blog-setup.md.
+name = "samhung-blog-images"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = false
+routes = [{ pattern = "blog-api.samhungstudio.com", custom_domain = true }]
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "samhung-blog"
+
+[vars]
+PROJECT_ID = "FIREBASE_PROJECT_ID"   # the blog's Firebase project id (js/blog/config.js)
+OWNER_UID = "OWNER_UID"              # the same id as in firestore.rules
+ORIGINS = "https://samhungstudio.com,https://samhung7.github.io"

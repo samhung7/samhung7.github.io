@@ -1,0 +1,26 @@
+# Static pages for published blog posts (link previews, search), and sitemap.xml. See tools/build-blog.mjs.
+name: Blog pages
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: blog-pages
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node tools/build-blog.mjs
+      - name: Commit if anything changed
+        run: |
+          git add -A blog sitemap.xml
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Blog: refresh post pages"
+          git push
