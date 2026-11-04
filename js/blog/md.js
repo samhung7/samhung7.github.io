@@ -39,7 +39,7 @@ export function render(text) {
   let para = null, list = null, quote = null;
   const end = () => {
     if (para) out.push(`<p>${para.join("<br>")}</p>`);
-    if (list) out.push(`<${list.tag}>${list.items.map((x) => `<li>${x}</li>`).join("")}</${list.tag}>`);
+    if (list) out.push(`<${list.tag}${list.start > 1 ? ` start="${list.start}"` : ""}>${list.items.map((x) => `<li>${x}</li>`).join("")}</${list.tag}>`);
     if (quote) out.push(`<blockquote><p>${quote.join("<br>")}</p></blockquote>`);
     para = list = quote = null;
   };
@@ -65,11 +65,12 @@ export function render(text) {
       if (!quote) { end(); quote = []; }
       quote.push(inline(x[1])); continue;
     }
-    const li = m.match(/^[-*]\s+(.*)$/), ol = !li && m.match(/^\d{1,3}[.)]\s+(.*)$/);
+    const li = m.match(/^[-*]\s+(.*)$/), ol = !li && m.match(/^(\d{1,3})[.)]\s+(.*)$/);
     if (li || ol) {
       const tag = li ? "ul" : "ol";
-      if (!list || list.tag !== tag) { end(); list = { tag, items: [] }; }
-      list.items.push(inline((li || ol)[1])); continue;
+      // a numbered list counts on from its first number, so one picked up after a picture or a paragraph keeps its numbers
+      if (!list || list.tag !== tag) { end(); list = { tag, items: [], start: ol ? +ol[1] : 1 }; }
+      list.items.push(inline(li ? li[1] : ol[2])); continue;
     }
     if (!para) { end(); para = []; }
     para.push(inline(line));
