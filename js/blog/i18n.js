@@ -23,6 +23,7 @@ const S = {
     saveFail: "儲存失敗：{e}", needTitle: "請輸入標題", needBody: "請輸入內文", badSlug: "網址格式不對", slugTaken: "這個網址已經有文章了",
     pastTime: "預約時間要在現在之後", view: "查看", edit: "編輯", close: "關閉", unsaved: "有尚未儲存的變更，確定要離開嗎？",
     cancel: "取消", confirm: "確定", linkUrl: "連結網址", imageUrl: "圖片網址",
+    picWidth: "圖片寬度", picFull: "滿版", picAlign: "對齊", pic_left: "置左", pic_center: "置中", pic_right: "置右",
     uploading: "圖片上傳中…", uploadFail: "圖片上傳失敗",
   },
   en: {
@@ -47,6 +48,7 @@ const S = {
     saveFail: "Couldn't save: {e}", needTitle: "Please add a title", needBody: "Please write something", badSlug: "That address isn't valid", slugTaken: "A post already uses this address",
     pastTime: "Pick a time in the future", view: "View", edit: "Edit", close: "Close", unsaved: "You have unsaved changes. Leave anyway?",
     cancel: "Cancel", confirm: "OK", linkUrl: "Link address", imageUrl: "Image address",
+    picWidth: "Width", picFull: "Full", picAlign: "Align", pic_left: "Left", pic_center: "Center", pic_right: "Right",
     uploading: "Uploading picture…", uploadFail: "Couldn't upload the picture",
   },
 };

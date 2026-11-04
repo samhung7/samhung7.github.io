@@ -3,7 +3,7 @@
    device 800 ms after each change until it's saved. On top: drafts, publishing now or at a set time, tags, the address.
    Routes: #/ the list, #/new a new post, #/edit/<slug> an existing one. */
 import { backend, off, demo, isLive } from "./backend.js";
-import { render, readMinutes } from "./md.js";
+import { render, readMinutes, PIC_LINE, picOpts, picSpec } from "./md.js";
 import { t, fmtDate } from "./i18n.js";
 import { fill, initChrome, onLang, h, toast, demoBanner, postUrl } from "./chrome.js";
 import { CONFIG } from "./config.js";
@@ -198,16 +198,45 @@ function editor(p) {
   const ico = (d) => { const e = document.createElementNS("http://www.w3.org/2000/svg", "svg"); e.setAttribute("viewBox", "0 0 24 24"); e.innerHTML = d; return e; };
   const tool = (label, txt, fn, cls = "") => h("button", { type: "button", class: "tool " + cls, "aria-label": t(label), title: t(label), "data-tool": "1", onclick: fn }, txt);
   const prevBtn = h("button", { type: "button", class: "btn small", onclick: togglePreview }, t("preview"));
+  // a picture's size and place: shown in the toolbar while the caret is on a picture's line, and rewrites that line's {…}
+  const picBar = h("div", { class: "pic-bar", hidden: true });
+  const lineAt = (pos) => { const st = ta.value.lastIndexOf("\n", pos - 1) + 1, e0 = ta.value.indexOf("\n", pos); return { st, en: e0 < 0 ? ta.value.length : e0 }; };
+  function picLine() {
+    if (previewing || document.activeElement !== ta) return null;
+    const { st, en } = lineAt(ta.selectionStart), m = ta.value.slice(st, en).trim().match(PIC_LINE);
+    return m && !m[2].startsWith("#up") ? { st, en, m } : null;
+  }
+  function setPic(change) {
+    const L = picLine(); if (!L) return;
+    const o = { ...picOpts(L.m[3]), ...change }; if (!o.w) o.a = "center";
+    const line = `![${L.m[1]}](${L.m[2]})${picSpec(o)}`, caret = L.st + line.length;
+    ta.setRangeText(line, L.st, L.en, "end"); ta.selectionStart = ta.selectionEnd = caret; changed(); drawPicBar();
+  }
+  const optBtn = (label, on, fn, kids) => h("button", { type: "button", class: "chip pic-opt" + (on ? " on" : ""), "aria-pressed": on ? "true" : "false", title: label, "aria-label": label,
+    onmousedown: (e) => e.preventDefault(), onclick: fn }, kids ?? label); // mousedown kept off so the text keeps its caret
+  const alignIco = (a) => ico({ left: '<path d="M4 6h16M4 10h9M4 14h16M4 18h9"/>', center: '<path d="M4 6h16M7.5 10h9M4 14h16M7.5 18h9"/>', right: '<path d="M4 6h16M11 10h9M4 14h16M11 18h9"/>' }[a]);
+  function drawPicBar() {
+    const L = picLine();
+    picBar.hidden = !L; toolbar?.classList.toggle("with-pic", !!L);
+    if (!L) return;
+    const o = picOpts(L.m[3]);
+    fill(picBar,
+      h("span", { class: "grp" }, h("span", { class: "label" }, t("picWidth")),
+        [["30", "30%"], ["50", "50%"], ["75", "75%"], [null, t("picFull")]].map(([w, label]) => optBtn(label, o.w === w, () => setPic({ w })))),
+      h("span", { class: "grp" }, h("span", { class: "label" }, t("picAlign")),
+        ["left", "center", "right"].map((a) => { const b = optBtn(t("pic_" + a), o.a === a, () => setPic({ a }), alignIco(a)); if (!o.w) b.disabled = true; return b; })));
+  }
+  for (const ev of ["click", "keyup", "focus", "blur", "input", "select"]) ta.addEventListener(ev, () => setTimeout(drawPicBar, 0));
   const toolbar = h("div", { class: "ed-tools" },
     tool("bold", "B", () => wrap("**", "**", t("bold")), "b"), tool("italic", "I", () => wrap("*", "*", t("italic")), "i"),
     tool("heading", "H", () => prefix("## ")), tool("list", "•", () => prefix("- ")), tool("numList", "1.", () => prefix("1. ")),
     tool("quote", "❝", () => prefix("> ")), tool("code", "</>", () => wrap("`", "`", "code")), tool("link", ico('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'), () => link(false)),
     tool("image", ico('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 18 5.5-5 4 3.5 2.5-2 4 3.5"/>'), () => file.click()),
-    h("span", { class: "grow" }), prevBtn);
+    h("span", { class: "grow" }), prevBtn, picBar);
   function togglePreview() {
     previewing = !previewing;
     prevBtn.textContent = t(previewing ? "write" : "preview");
-    pv.hidden = !previewing; ta.hidden = previewing;
+    pv.hidden = !previewing; ta.hidden = previewing; drawPicBar();
     toolbar.querySelectorAll("[data-tool]").forEach((x) => { x.disabled = previewing; });
     if (previewing) pv.innerHTML = render(ta.value); // render() escapes everything
   }

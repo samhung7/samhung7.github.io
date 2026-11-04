@@ -67,6 +67,12 @@
 .post-body pre { padding: 18px 20px; border: 0.5px solid var(--line); border-radius: 6px; overflow-x: auto; line-height: 1.6; }
 .post-body pre code { border: 0; padding: 0; font-size: 0.85rem; }
 .post-body img { max-width: 100%; height: auto; display: block; border-radius: 4px; }
+.post-body figure.w30 { width: 30%; }
+.post-body figure.w50 { width: 50%; }
+.post-body figure.w75 { width: 75%; }
+.post-body figure.al-center { margin-left: auto; margin-right: auto; }
+.post-body figure.al-right { margin-left: auto; }
+.post-body figure[class] img { width: 100%; }
 .post-body figcaption { margin-top: 10px; text-align: center; font-size: 0.8rem; color: var(--muted); }
 
 /* share */
@@ -211,3 +217,14 @@ dialog.sheet .field { margin-top: 10px; }
 .post-mini h3 { font-size: clamp(1.35rem, 2.6vw, 1.7rem); margin-bottom: 8px; }
 @media (max-width: 600px) { .post-mini { grid-template-columns: 1fr; gap: 6px; } }
 .ed-body.drop { outline: 0.5px dashed var(--muted); outline-offset: 6px; }
+
+/* the picture's size and place, under the toolbar while the caret is on a picture */
+.pic-bar { flex-basis: 100%; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 8px 0 2px; margin-top: 8px; border-top: 0.5px dashed var(--line); }
+.pic-bar[hidden] { display: none; }
+.pic-bar { column-gap: 18px; row-gap: 8px; }
+.pic-bar .grp { display: inline-flex; align-items: center; gap: 6px; }
+.pic-bar .label { margin-right: 2px; }
+.pic-opt { height: 26px; padding: 0 10px; font-size: 0.74rem; }
+.pic-opt svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
+.pic-opt:disabled { opacity: 0.35; cursor: default; }
+@media (max-width: 600px) { .ed-tools.with-pic { flex-wrap: wrap; } }
