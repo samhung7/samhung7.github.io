@@ -136,7 +136,11 @@ body.busy .btn { pointer-events: none; opacity: 0.6; }
   font-family: var(--serif); font-size: clamp(1.9rem, 4.5vw, 2.8rem); line-height: 1.2; padding: 4px 0 18px; outline: none;
 }
 .ed-title-in::placeholder { color: var(--muted); opacity: 0.6; }
-.ed-tools { display: flex; align-items: center; gap: 2px; padding: 10px 0; border-bottom: 0.5px solid var(--line); flex-wrap: wrap; }
+/* stays at the top of the screen while a long post scrolls by, so a picture can go in anywhere */
+.ed-tools {
+  display: flex; align-items: center; gap: 2px; padding: 10px 0; border-bottom: 0.5px solid var(--line); flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 5; background: var(--bg); transition: background var(--slow);
+}
 .tool {
   min-width: 34px; height: 32px; border: 0; border-radius: 6px; background: none; color: var(--muted);
   font-family: var(--serif); font-size: 1rem; cursor: pointer; transition: color var(--slow), background var(--slow);
