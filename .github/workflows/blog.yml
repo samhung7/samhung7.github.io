@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "*/30 * * * *"
   workflow_dispatch:
+  push: # a change to the blog's code: stamp it again (tools/stamp-assets.mjs), in case that was missed
+    branches: [main]
+    paths: ["js/blog/**", "css/**"]
 permissions:
   contents: write
 concurrency: blog-pages
@@ -15,12 +18,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - run: node tools/stamp-assets.mjs
       - run: node tools/build-blog.mjs
       - name: Commit if anything changed
         run: |
-          git add -A blog sitemap.xml
+          git add -A blog sitemap.xml index.html 404.html
           if git diff --cached --quiet; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
           git commit -m "Blog: refresh post pages"
+          git pull --rebase
           git push
