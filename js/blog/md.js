@@ -2,7 +2,17 @@
    Every piece of the author's text is escaped; only the tags below are ever produced, and links/images
    keep only http(s), mailto and same-site addresses. Like StoaTalk's long posts, plus ### headings,
    *italics*, `code`, ``` code blocks, [links](url) and ![pictures](url).
-   Blocks: # ## ### headings, > quotes, - and 1. lists, --- rules, ``` fences, ![alt](url) on its own line, else paragraphs. */
+   Blocks: # ## ### headings, > quotes, - and 1. lists, --- rules, ``` fences, ![alt](url) on its own line, else paragraphs.
+   A picture on its own line may end with its size and place: ![alt](url){50% left} — 30%, 50% or 75% of the column
+   (else all of it), and left, center (the default) or right. */
+
+// a picture line: alt, url, and the {…} after it
+export const PIC_LINE = /^!\[([^\]]*)\]\(([^)\s]+)\)(?:\{([^}]*)\})?$/;
+export function picOpts(spec) {
+  const w = String(spec || "").match(/\b(30|50|75)%/)?.[1] || null, a = String(spec || "").match(/\b(left|center|right)\b/)?.[1] || "center";
+  return { w, a: w ? a : "center" };
+}
+export const picSpec = ({ w, a }) => (w ? `{${w}%${a !== "center" ? " " + a : ""}}` : "");
 
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ESC[c]);
@@ -56,9 +66,9 @@ export function render(text) {
     if (!m) { end(); continue; }
     if ((x = m.match(/^(#{1,3})\s+(.*)$/))) { end(); const h = x[1].length + 1; out.push(`<h${h}>${inline(x[2])}</h${h}>`); continue; }
     if (/^(-{3,}|\*{3,})$/.test(m)) { end(); out.push("<hr>"); continue; }
-    if ((x = m.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/))) {
-      end(); const u = safeImg(x[2]);
-      if (u) out.push(`<figure><img src="${esc(u)}" alt="${esc(x[1])}" loading="lazy">${x[1] ? `<figcaption>${esc(x[1])}</figcaption>` : ""}</figure>`);
+    if ((x = m.match(PIC_LINE))) {
+      end(); const u = safeImg(x[2]), o = picOpts(x[3]);
+      if (u) out.push(`<figure${o.w ? ` class="w${o.w} al-${o.a}"` : ""}><img src="${esc(u)}" alt="${esc(x[1])}" loading="lazy">${x[1] ? `<figcaption>${esc(x[1])}</figcaption>` : ""}</figure>`);
       continue;
     }
     if ((x = m.match(/^>\s?(.*)$/))) {
@@ -81,7 +91,7 @@ export function render(text) {
 
 // the words without the marks: for excerpts, share text and meta descriptions
 export const plain = (text) => String(text || "").replace(/```[\s\S]*?```/g, " ").split("\n").map((l) => l.trim())
-  .filter((l) => l && !/^!\[[^\]]*\]\([^)]*\)$/.test(l) && !/^(-{3,}|\*{3,})$/.test(l))
+  .filter((l) => l && !PIC_LINE.test(l) && !/^(-{3,}|\*{3,})$/.test(l))
   .map((l) => l.replace(/^(#{1,3}\s+|>\s?|[-*]\s+|\d{1,3}[.)]\s+)/, "").replace(/!\[[^\]]*\]\([^)]*\)/g, "")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").replace(/`([^`]+)`/g, "$1"))
   .join(" ").replace(/\s+/g, " ").trim();
