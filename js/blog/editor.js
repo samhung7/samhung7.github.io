@@ -2,7 +2,7 @@
    Like StoaTalk's long posts: a page of its own, a Markdown toolbar, Write / Preview, and what's typed kept on this
    device 800 ms after each change until it's saved. On top: drafts, publishing now or at a set time, tags, the address.
    Routes: #/ the list, #/new a new post, #/edit/<slug> an existing one. */
-import { backend, off, demo, isLive } from "./backend.js";
+import { backend, off, demo, isLive, editedAt } from "./backend.js";
 import { render, readMinutes, PIC_LINE, picOpts, picSpec } from "./md.js";
 import { t, fmtDate } from "./i18n.js";
 import { fill, initChrome, onLang, h, toast, demoBanner, postUrl } from "./chrome.js";
@@ -272,7 +272,8 @@ function editor(p) {
   const actions = h("div", { class: "ed-actions" });
   function drawActions() {
     const live = p && isLive(p);
-    fill(whenBox, ...(live ? [h("p", { class: "label" }, t("publishedAt", { d: fmtDate(p.publishAt, true) }))]
+    fill(whenBox, ...(live ? [h("p", { class: "label" }, t("publishedAt", { d: fmtDate(p.publishAt, true) })),
+        editedAt(p) ? h("p", { class: "label" }, t("lastUpdated", { d: fmtDate(editedAt(p), true) })) : null]
       : [radio("now", t("publishNow")), radio("later", t("schedule")), when === "later" ? atIn : null]));
     fill(actions, 
       p && p.status === "published" ? h("button", { class: "btn", type: "button", onclick: () => save("draft") }, t("unpublish"))
@@ -322,7 +323,8 @@ function editor(p) {
     let status = "draft", publishAt = p?.publishAt || null;
     if (kind === "publish") {
       status = "published";
-      if (p && isLive(p)) publishAt = p.publishAt; // an update keeps its date
+      if (p && isLive(p)) publishAt = p.publishAt; // an update keeps its first-published date
+      else if (when === "now" && p?.publishAt && p.publishAt.getTime() <= Date.now()) publishAt = p.publishAt; // so does one taken down and put back
       else if (when === "later") {
         if (!(at instanceof Date) || isNaN(at) || at.getTime() <= Date.now() + 30e3) { atIn.focus(); return toast(t("pastTime")); }
         publishAt = at;

@@ -1,6 +1,6 @@
 /* One post, at /blog/<slug>/ (served by 404.html, or by the page tools/build-blog.mjs made for it). Anything else that
    lands on 404.html is told the page isn't there. The owner, signed in, can also open a draft or a scheduled post here. */
-import { backend, off, demo, isLive } from "./backend.js";
+import { backend, off, demo, isLive, editedAt } from "./backend.js";
 import { render, excerpt, readMinutes } from "./md.js";
 import { t, fmtDate, lang } from "./i18n.js";
 import { fill, initChrome, onLang, h, demoBanner, tagUrl } from "./chrome.js";
@@ -42,7 +42,9 @@ function draw() {
       h("p", { class: "post-meta label" },
         h("time", { datetime: (p.publishAt || p.updatedAt).toISOString() }, fmtDate(p.publishAt || p.updatedAt)),
         h("span", { class: "dot" }, t("minRead", { n: readMinutes(p.body) })),
-        p.tags.map((x) => h("a", { class: "dot", href: tagUrl(x) }, "#" + x)))),
+        p.tags.map((x) => h("a", { class: "dot", href: tagUrl(x) }, "#" + x))),
+      live && editedAt(p) ? h("p", { class: "post-updated label" },
+        h("time", { datetime: editedAt(p).toISOString() }, t("lastUpdated", { d: fmtDate(editedAt(p), true) }))) : null),
     h("div", { class: "post-body", html: render(p.body) }),
     shareRow({ url, title: p.title }));
 }

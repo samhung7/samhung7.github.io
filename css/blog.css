@@ -46,6 +46,7 @@
 .post-head { padding-bottom: 36px; margin-bottom: 44px; border-bottom: 0.5px solid var(--line); }
 .post-head h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); line-height: 1.12; }
 .post-meta { margin-top: 24px; }
+.post-updated { margin-top: 8px; opacity: .75; }
 .post-meta a { transition: color var(--slow); }
 .post-meta a:hover { color: var(--ink); }
 

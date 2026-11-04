@@ -33,13 +33,15 @@ const val = (v) => v == null ? null : "stringValue" in v ? v.stringValue : "time
   : "arrayValue" in v ? (v.arrayValue.values || []).map(val) : null;
 const posts = (await res.json()).filter((r) => r.document).map(({ document: d }) => ({
   slug: d.name.split("/").pop(), title: val(d.fields.title) || "", body: val(d.fields.body) || "", tags: val(d.fields.tags) || [],
-  publishAt: val(d.fields.publishAt), updatedAt: new Date(d.updateTime),
+  publishAt: val(d.fields.publishAt), updatedAt: val(d.fields.updatedAt) || new Date(d.updateTime),
 })).filter((p) => /^[a-z0-9][a-z0-9-]{0,79}$/.test(p.slug));
 
 const tpl = fs.readFileSync(path.join(ROOT, "404.html"), "utf8");
 const day = (d) => new Intl.DateTimeFormat("zh-TW", { year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Taipei" }).format(d);
+const dayTime = (d) => new Intl.DateTimeFormat("zh-TW", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Taipei" }).format(d);
 const keep = new Set();
 for (const p of posts) {
+  const edited = p.updatedAt - p.publishAt > 60e3 ? p.updatedAt : null; // same rule as editedAt in js/blog/backend.js
   const link = `${CONFIG.site}/blog/${p.slug}/`, desc = excerpt(p.body, 150), img = p.body.match(/!\[[^\]]*\]\((https:\/\/[^)\s]+)\)/)?.[1];
   const og = [
     `<link rel="canonical" href="${esc(link)}">`,
@@ -48,12 +50,14 @@ for (const p of posts) {
     `<meta property="og:url" content="${esc(link)}">`, `<meta property="og:image" content="${esc(img || CONFIG.site + "/icons/og-default.png")}">`,
     ...(img ? [] : [`<meta property="og:image:width" content="1200">`, `<meta property="og:image:height" content="630">`]),
     `<meta property="article:published_time" content="${p.publishAt.toISOString()}">`,
+    `<meta property="article:modified_time" content="${p.updatedAt.toISOString()}">`,
     ...p.tags.map((t) => `<meta property="article:tag" content="${esc(t)}">`),
     `<meta name="twitter:card" content="summary_large_image">`,
   ].join("\n  ");
   const article = `<a class="label back" href="/blog/">← 所有文章</a>
         <header class="post-head"><h1>${esc(p.title)}</h1>
-          <p class="post-meta label"><time datetime="${p.publishAt.toISOString()}">${day(p.publishAt)}</time><span class="dot">${readMinutes(p.body)} 分鐘閱讀</span>${p.tags.map((t) => `<a class="dot" href="/blog/?tag=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("")}</p>
+          <p class="post-meta label"><time datetime="${p.publishAt.toISOString()}">${day(p.publishAt)}</time><span class="dot">${readMinutes(p.body)} 分鐘閱讀</span>${p.tags.map((t) => `<a class="dot" href="/blog/?tag=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("")}</p>${edited ? `
+          <p class="post-updated label"><time datetime="${edited.toISOString()}">最近更新 ${dayTime(edited)}</time></p>` : ""}
         </header>
         <div class="post-body">${render(p.body)}</div>`;
   const html = tpl.replace("<!DOCTYPE html>", "<!DOCTYPE html>\n" + MARK)

@@ -17,6 +17,8 @@ export const off = !configured && !demo; // no Firebase yet, and not trying the 
 const toDate = (v) => (v == null ? null : v instanceof Date ? v : typeof v.toDate === "function" ? v.toDate() : new Date(v));
 const norm = (slug, d) => d && ({ slug, title: d.title || "", body: d.body || "", tags: Array.isArray(d.tags) ? d.tags : [],
   status: d.status === "published" ? "published" : "draft", publishAt: toDate(d.publishAt), createdAt: toDate(d.createdAt), updatedAt: toDate(d.updatedAt) });
+// last edited, when that came after it went out (a scheduled post edited before its time counts as not edited)
+export const editedAt = (p) => (p.updatedAt && p.publishAt && p.updatedAt - p.publishAt > 60e3 ? p.updatedAt : null);
 export const isLive = (p, now = Date.now()) => p.status === "published" && p.publishAt && p.publishAt.getTime() <= now;
 
 /* ---------- Firestore ---------- */
