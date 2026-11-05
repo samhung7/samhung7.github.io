@@ -2,6 +2,7 @@
 # Needs the CLOUDFLARE_API_TOKEN ("Edit Cloudflare Workers" + "Workers R2 Storage: Edit") and CLOUDFLARE_ACCOUNT_ID
 # repository secrets; without them it does nothing. With DISPATCH_TOKEN (a fine-grained GitHub token for this repository
 # with "Actions: Read and write") it also hands the service the token it starts the blog's page build with.
+# ANALYTICS_SECRET (optional, any long random string) is the secret the visitor statistics hash with (worker/src/analytics.js).
 name: Deploy picture service
 on:
   push:
@@ -18,6 +19,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+      ANALYTICS_SECRET: ${{ secrets.ANALYTICS_SECRET }}
     steps:
       - if: env.CLOUDFLARE_API_TOKEN == ''
         run: echo "CLOUDFLARE_API_TOKEN is not set; skipping."
@@ -32,3 +34,4 @@ jobs:
           wranglerVersion: "4"
           secrets: |
             ${{ env.DISPATCH_TOKEN != '' && 'DISPATCH_TOKEN' || '' }}
+            ${{ env.ANALYTICS_SECRET != '' && 'ANALYTICS_SECRET' || '' }}

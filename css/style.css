@@ -208,6 +208,7 @@ footer {
 }
 
 footer a { transition: color var(--slow); }
+.foot-links { display: flex; gap: 24px; }
 footer a:hover { color: var(--ink); }
 
 @media (max-width: 600px) {

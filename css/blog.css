@@ -229,3 +229,8 @@ dialog.sheet .field { margin-top: 10px; }
 .pic-opt svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; }
 .pic-opt:disabled { opacity: 0.35; cursor: default; }
 @media (max-width: 600px) { .ed-tools.with-pic { flex-wrap: wrap; } }
+
+/* /privacy/: both languages are on the page; the 中/EN toggle shows one */
+.privacy .only-en { display: none; }
+html[lang="en"] .privacy .only-en { display: block; }
+html[lang="en"] .privacy .only-zh { display: none; }

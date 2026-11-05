@@ -12,6 +12,7 @@
       blog: 'Blog',
       journal: 'Journal',
       allPosts: '所有文章 →',
+      privacy: '隱私權',
       langBtn: 'EN'
     },
     en: {
@@ -25,6 +26,7 @@
       blog: 'Blog',
       journal: 'Journal',
       allPosts: 'All posts →',
+      privacy: 'Privacy',
       langBtn: '中'
     }
   };

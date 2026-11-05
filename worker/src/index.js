@@ -6,8 +6,10 @@
    POST /rebuild         the editor, right after publishing: asks GitHub to run .github/workflows/blog.yml now, so the
                          post's static page (link previews) is up within a minute or two instead of waiting for a schedule.
    The cron does the same every 15 minutes, which also brings scheduled posts' pages up soon after their time
-   (GitHub's own schedule runs late or not at all). Both need the DISPATCH_TOKEN secret. */
+   (GitHub's own schedule runs late or not at all). Both need the DISPATCH_TOKEN secret.
+   POST /e               the site's visitor statistics, from any page (src/analytics.js); always 204. */
 import { verifier } from "./token.js";
+import { collect } from "./analytics.js";
 
 const MAX = 3 * 1024 * 1024;
 const NAME = /^([A-Za-z0-9_-]{22})\.jpg$/;
@@ -33,6 +35,7 @@ export function makeHandler({ verify, fetcher = (...a) => fetch(...a) }) {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...cors,
       "Access-Control-Allow-Methods": "PUT, POST", "Access-Control-Allow-Headers": "Authorization, Content-Type", "Access-Control-Max-Age": "86400" } });
     const parts = new URL(req.url).pathname.split("/").filter(Boolean);
+    if (req.method === "POST" && parts.length === 1 && parts[0] === "e") return collect(req, env, cors);
     if (req.method === "POST" && parts.length === 1 && parts[0] === "rebuild") {
       const uid = await verify((req.headers.get("Authorization") || "").replace(/^Bearer /, ""), env);
       if (!uid) return out(401);

@@ -64,6 +64,8 @@ function gate() {
       h("button", { class: "btn primary", type: "button", onclick: async () => { try { me = await B.signIn(); route(); } catch (e) { toast(t("saveFail", { e: e.code || e.message })); } } }, t("signIn"))));
     return false;
   }
+  // the owner's own visits stay out of the statistics in every browser the editor was opened in (js/blog/analytics.js)
+  try { if (me.owner) localStorage.setItem("ss-no-track", "1"); } catch (e) {}
   if (!me.owner) {
     fill(app, h("div", { class: "nothing" }, h("p", {}, t("notOwner")), h("p", { class: "label" }, t("yourUid")), h("code", { class: "uid" }, me.uid),
       h("p", {}, h("button", { class: "btn", type: "button", onclick: async () => { await B.signOut(); me = null; route(); } }, t("signOut")))));
