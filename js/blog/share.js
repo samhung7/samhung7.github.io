@@ -1,4 +1,6 @@
-/* The share row under a post: copy the link, LINE, Facebook, X, Threads, and the device's own share sheet where there is one. */
+/* The share row under a post: copy the link, LINE, Facebook, X, Threads, and the device's own share sheet where there is one.
+   Each shares the address with ?ref=<where> so the statistics can tell who came back through a share (js/blog/analytics.js
+   counts it and takes it off the address again), and each button carries data-share, which analytics.js counts on click. */
 import { t } from "./i18n.js";
 import { h, toast } from "./chrome.js";
 
@@ -20,20 +22,22 @@ async function copy(url) {
   }
 }
 
+export const tagged = (url, where) => url + (url.includes("?") ? "&" : "?") + "ref=" + where;
+
 export function shareRow({ url, title }) {
-  const u = encodeURIComponent(url), txt = encodeURIComponent(title);
+  const u = (k) => encodeURIComponent(tagged(url, k)), txt = encodeURIComponent(title);
   const targets = [
-    ["line", "LINE", `https://social-plugins.line.me/lineit/share?url=${u}`],
-    ["fb", "Facebook", `https://www.facebook.com/sharer/sharer.php?u=${u}`],
-    ["x", "X", `https://x.com/intent/post?text=${txt}&url=${u}`],
-    ["threads", "Threads", `https://www.threads.net/intent/post?text=${encodeURIComponent(title + " " + url)}`],
+    ["line", "LINE", `https://social-plugins.line.me/lineit/share?url=${u("line")}`],
+    ["fb", "Facebook", `https://www.facebook.com/sharer/sharer.php?u=${u("fb")}`],
+    ["x", "X", `https://x.com/intent/post?text=${txt}&url=${u("x")}`],
+    ["threads", "Threads", `https://www.threads.net/intent/post?text=${encodeURIComponent(title + " " + tagged(url, "threads"))}`],
   ];
-  const btn = (k, label, attrs) => h(attrs.href ? "a" : "button", { class: "share-btn", "aria-label": label, title: label, ...(attrs.href ? {} : { type: "button" }), ...attrs }, svg(k));
+  const btn = (k, label, attrs) => h(attrs.href ? "a" : "button", { class: "share-btn", "aria-label": label, title: label, "data-share": k, ...(attrs.href ? {} : { type: "button" }), ...attrs }, svg(k));
   const row = h("div", { class: "share" },
     h("span", { class: "label" }, t("share")),
     h("div", { class: "share-btns" },
-      btn("link", t("copyLink"), { onclick: async () => toast(t((await copy(url)) ? "copied" : "copyFail")) }),
+      btn("link", t("copyLink"), { "data-share": "copy", onclick: async () => toast(t((await copy(tagged(url, "copy"))) ? "copied" : "copyFail")) }),
       targets.map(([k, label, href]) => btn(k, label, { href, target: "_blank", rel: "noopener" })),
-      navigator.share ? btn("more", t("more"), { onclick: () => navigator.share({ title, url }).catch(() => {}) }) : null));
+      navigator.share ? btn("more", t("more"), { "data-share": "native", onclick: () => navigator.share({ title, url: tagged(url, "native") }).catch(() => {}) }) : null));
   return row;
 }

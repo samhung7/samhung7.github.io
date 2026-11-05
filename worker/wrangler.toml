@@ -13,6 +13,11 @@ routes = [{ pattern = "blog-api.samhungstudio.com", custom_domain = true }]
 binding = "IMAGES"
 bucket_name = "samhung-blog"
 
+# The site's visitor statistics (src/analytics.js, docs/analytics.md). The dataset is made on the first write.
+[[analytics_engine_datasets]]
+binding = "EVENTS"
+dataset = "samhung_site_events"
+
 [vars]
 PROJECT_ID = "samhung-studio"        # the blog's Firebase project id (js/blog/config.js)
 OWNER_UID = "CErdnTY8wXfBli0dF8X93kTXXGp2"            # the same id as in firestore.rules

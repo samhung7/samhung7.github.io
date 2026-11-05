@@ -19,8 +19,13 @@ function setMeta(p) {
   document.querySelector('meta[name="description"]').setAttribute("content", excerpt(p.body, 150));
 }
 
+// tell the statistics (js/blog/analytics.js) once that this address has nothing to show
+let told = false;
+const notFound = () => { if (!told) { told = true; (window.ssq = window.ssq || []).push(["notfound"]); } };
+
 function draw() {
   if (state === "404") {
+    notFound();
     document.title = "404 · Samhung Studio";
     return fill(box, h("div", { class: "nothing" }, h("p", { class: "num big" }, "404"),
       h("p", {}, lang() === "en" ? "There's nothing at this address." : "這個網址沒有東西。"),
@@ -29,6 +34,7 @@ function draw() {
   if (state === "loading") return pre ? null : fill(box, h("p", { class: "empty label" }, t("loading")));
   if (state === "missing" || state === "off") {
     if (pre) return;
+    if (state === "missing") notFound();
     return fill(box, h("div", { class: "nothing" }, h("p", {}, t(state === "off" ? "notSetUp" : "notFound")), h("p", {}, h("a", { class: "label back", href: "/blog/" }, t("back")))));
   }
   const p = post, url = CONFIG.site + "/blog/" + p.slug + "/";

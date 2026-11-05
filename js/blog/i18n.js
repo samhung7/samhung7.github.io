@@ -6,7 +6,7 @@ const S = {
     loadFail: "載入失敗，請稍後再試。", notFound: "找不到這篇文章，可能已移除或尚未發佈。", back: "← 所有文章",
     minRead: "{n} 分鐘閱讀", notSetUp: "部落格即將開張。",
     share: "分享", copyLink: "複製連結", copied: "已複製連結", more: "更多…", copyFail: "無法複製，請手動複製網址",
-    demo: "示範模式：文章只存在這個瀏覽器。",
+    demo: "示範模式：文章只存在這個瀏覽器。", privacy: "隱私權",
     // editor
     editor: "編輯器", signIn: "以 Google 登入", signOut: "登出", notOwner: "這個帳號沒有編輯權限。",
     yourUid: "你的使用者 ID（填入 config.js 與 firestore.rules 的 ownerUid）：",
@@ -32,7 +32,7 @@ const S = {
     loadFail: "Couldn't load. Please try again later.", notFound: "This post doesn't exist, or isn't published yet.", back: "← All posts",
     minRead: "{n} min read", notSetUp: "The blog opens soon.",
     share: "Share", copyLink: "Copy link", copied: "Link copied", more: "More…", copyFail: "Couldn't copy. Please copy the address yourself.",
-    demo: "Demo mode: posts are kept in this browser only.",
+    demo: "Demo mode: posts are kept in this browser only.", privacy: "Privacy",
     editor: "Editor", signIn: "Sign in with Google", signOut: "Sign out", notOwner: "This account can't edit the blog.",
     yourUid: "Your user id (put it in ownerUid in config.js and firestore.rules):",
     newPost: "New post", posts: "Posts", drafts: "Drafts", scheduled: "Scheduled", published: "Published",
