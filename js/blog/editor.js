@@ -20,7 +20,7 @@ const store = {
 };
 
 const statusOf = (p) => (p.status === "draft" ? "drafts" : isLive(p) ? "published" : "scheduled");
-const slugOk = (s) => /^[a-z0-9][a-z0-9-]{0,79}$/.test(s);
+const slugOk = (s) => /^[a-z0-9][a-z0-9-]{0,79}$/.test(s) && s !== "editor" && s !== "dashboard"; // those two are pages of their own
 function slugify(title) {
   const s = title.toLowerCase().normalize("NFKD").replace(/[^\x00-\x7f]/g, " ").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60).replace(/-+$/, "");
   if (s.length >= 3 && /[a-z]/.test(s)) return s;
@@ -101,6 +101,7 @@ async function dashboard() {
     fill(app, 
       h("div", { class: "ed-top" }, h("h1", { class: "ed-h" }, t("editor")),
         h("div", { class: "row" }, h("span", { class: "label" }, me.name || ""), demo ? null : h("button", { class: "btn small", type: "button", onclick: async () => { await B.signOut(); me = null; route(); } }, t("signOut")),
+          h("a", { class: "btn small", href: "/blog/dashboard/" + (demo ? "?demo" : "") }, "Dashboard"),
           h("a", { class: "btn primary", href: "#/new" }, "＋ " + t("newPost")))),
       h("div", { class: "section-head tag-bar" }, tabBtn("all", t("all")), tabBtn("drafts", t("drafts")), tabBtn("scheduled", t("scheduled")), tabBtn("published", t("published"))),
       shown.length ? h("div", { class: "ed-list" }, shown.map((p) => {

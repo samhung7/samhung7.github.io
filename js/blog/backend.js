@@ -55,6 +55,7 @@ async function firebaseBackend() {
     async whoami() { await authReady; return user && { uid: user.uid, name: user.displayName, email: user.email, owner: user.uid === CONFIG.ownerUid }; },
     async signIn() { await A.signInWithPopup(auth, new A.GoogleAuthProvider()); return this.whoami(); },
     async signOut() { await A.signOut(auth); },
+    async idToken() { return auth.currentUser ? auth.currentUser.getIdToken() : null; },
     // the static page for link previews (tools/build-blog.mjs), built now instead of at the next scheduled run; best effort
     async rebuild() {
       try { await fetch(`${CONFIG.images.api}/rebuild`, { method: "POST", headers: { Authorization: "Bearer " + (await auth.currentUser.getIdToken()) } }); } catch (e) {}
@@ -89,6 +90,7 @@ function demoBackend() {
     async whoami() { return { uid: "demo", name: "Sam", owner: true }; },
     async signIn() { return this.whoami(); },
     async signOut() {},
+    async idToken() { return "demo"; },
     demo: true,
     async rebuild() {},
     async putImage(bytes) { // kept inside the post itself; fine for trying things out, not for real posts

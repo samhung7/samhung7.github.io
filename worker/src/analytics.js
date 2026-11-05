@@ -20,6 +20,7 @@
      blob18 detail     share: the button; out: the other site; lang: the language switched to; error: the message
      double1 depth (%)   double2 seconds in front   double3 LCP (ms)   double4 INP (ms)   double5 CLS */
 
+export const DATASET = "samhung_site_events"; // as in wrangler.toml
 const TYPES = new Set(["pageview", "read", "leave", "share", "out", "lang", "error", "notfound"]);
 const BOT = /bot|crawl|spider|slurp|scrape|headless|phantom|lighthouse|pagespeed|preview|facebookexternalhit|embedly|curl|wget|python|httpclient|okhttp|go-http|java\/|axios|node-fetch|monitor|uptime/i;
 const MAX_BODY = 8 * 1024, MAX_EVENTS = 10;

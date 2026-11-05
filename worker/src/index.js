@@ -7,9 +7,11 @@
                          post's static page (link previews) is up within a minute or two instead of waiting for a schedule.
    The cron does the same every 15 minutes, which also brings scheduled posts' pages up soon after their time
    (GitHub's own schedule runs late or not at all). Both need the DISPATCH_TOKEN secret.
-   POST /e               the site's visitor statistics, from any page (src/analytics.js); always 204. */
+   POST /e               the site's visitor statistics, from any page (src/analytics.js); always 204.
+   GET /stats?days=7     those statistics added up for /blog/dashboard/ (src/stats.js); owner only, like PUT /img. */
 import { verifier } from "./token.js";
 import { collect } from "./analytics.js";
+import { stats, RANGES } from "./stats.js";
 
 const MAX = 3 * 1024 * 1024;
 const NAME = /^([A-Za-z0-9_-]{22})\.jpg$/;
@@ -26,16 +28,28 @@ export async function dispatch(env, fetcher = (...a) => fetch(...a)) {
   return res.ok;
 }
 
-export function makeHandler({ verify, fetcher = (...a) => fetch(...a) }) {
+export function makeHandler({ verify, fetcher = (...a) => fetch(...a), getStats = stats }) {
   return async (req, env) => {
     const origin = req.headers.get("Origin");
     const ok = !!origin && (env.ORIGINS || "").split(",").map((o) => o.trim()).includes(origin);
     const cors = ok ? { "Access-Control-Allow-Origin": origin, Vary: "Origin" } : {};
     const out = (status) => new Response(null, { status, headers: cors });
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...cors,
-      "Access-Control-Allow-Methods": "PUT, POST", "Access-Control-Allow-Headers": "Authorization, Content-Type", "Access-Control-Max-Age": "86400" } });
+      "Access-Control-Allow-Methods": "GET, PUT, POST", "Access-Control-Allow-Headers": "Authorization, Content-Type", "Access-Control-Max-Age": "86400" } });
     const parts = new URL(req.url).pathname.split("/").filter(Boolean);
     if (req.method === "POST" && parts.length === 1 && parts[0] === "e") return collect(req, env, cors);
+    if (req.method === "GET" && parts.length === 1 && parts[0] === "stats") {
+      const uid = await verify((req.headers.get("Authorization") || "").replace(/^Bearer /, ""), env);
+      if (!uid) return out(401);
+      if (!env.OWNER_UID || uid !== env.OWNER_UID) return out(403);
+      const json = (status, body) => new Response(JSON.stringify(body), { status,
+        headers: { ...cors, "Content-Type": "application/json", "Cache-Control": "private, no-store" } });
+      if (!env.CF_ACCOUNT_ID || !env.CF_ANALYTICS_TOKEN) return json(503, { error: "not-configured" });
+      const days = +new URL(req.url).searchParams.get("days") || 7;
+      if (!RANGES.includes(days)) return out(400);
+      try { return json(200, await getStats(env, days)); }
+      catch (e) { console.error(e); return json(502, { error: "query", detail: String(e.message || e).slice(0, 300) }); }
+    }
     if (req.method === "POST" && parts.length === 1 && parts[0] === "rebuild") {
       const uid = await verify((req.headers.get("Authorization") || "").replace(/^Bearer /, ""), env);
       if (!uid) return out(401);
