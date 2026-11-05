@@ -3,6 +3,7 @@
 # repository secrets; without them it does nothing. With DISPATCH_TOKEN (a fine-grained GitHub token for this repository
 # with "Actions: Read and write") it also hands the service the token it starts the blog's page build with.
 # ANALYTICS_SECRET (optional, any long random string) is the secret the visitor statistics hash with (worker/src/analytics.js).
+# CF_ANALYTICS_TOKEN (a Cloudflare token with "Account Analytics: Read") lets GET /stats read them for /blog/dashboard/.
 name: Deploy picture service
 on:
   push:
@@ -20,6 +21,8 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
       ANALYTICS_SECRET: ${{ secrets.ANALYTICS_SECRET }}
+      CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
+      CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - if: env.CLOUDFLARE_API_TOKEN == ''
         run: echo "CLOUDFLARE_API_TOKEN is not set; skipping."
@@ -35,3 +38,5 @@ jobs:
           secrets: |
             ${{ env.DISPATCH_TOKEN != '' && 'DISPATCH_TOKEN' || '' }}
             ${{ env.ANALYTICS_SECRET != '' && 'ANALYTICS_SECRET' || '' }}
+            ${{ env.CF_ANALYTICS_TOKEN != '' && 'CF_ANALYTICS_TOKEN' || '' }}
+            ${{ env.CF_ANALYTICS_TOKEN != '' && 'CF_ACCOUNT_ID' || '' }}

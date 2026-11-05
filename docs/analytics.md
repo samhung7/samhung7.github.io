@@ -8,7 +8,9 @@
 1. `js/blog/analytics.js`（每頁 `<script defer>`）把事件用 `sendBeacon` 送到 `https://blog-api.samhungstudio.com/e`。
 2. `worker/src/analytics.js` 過濾爬蟲與其他網站的請求，算出當天有效的訪客雜湊，一個事件寫成 Workers Analytics Engine 的一筆
    （dataset `samhung_site_events`，約保留 3 個月）。欄位順序寫在該檔開頭。
-3. 第二階段：每日彙總到 D1 與 `/blog/dashboard/`（只有 Sam 登入看得到）。
+3. `/blog/dashboard/`（只有 Sam 的 Google 帳號看得到）向 Worker 的 `GET /stats?days=1|7|30|90` 要數字；
+   Worker 驗證登入後，用 Analytics Engine 的 SQL API 現算（`worker/src/stats.js`）。加 `?demo` 可看假資料版。
+4. 之後：Analytics Engine 只保留約 3 個月，要看更久以前的數字，需在資料滿 3 個月前（2027 年 2 月初）加上每日彙總到 D1。
 
 事件：`pageview`、`read`（讀完）、`leave`（捲動深度、前景秒數、Core Web Vitals）、`share`、`out`（外部連結）、
 `lang`、`error`、`notfound`。分享按鈕的連結會帶 `?ref=line|fb|x|threads|copy|native`，有人點回來就算這個來源，
@@ -30,7 +32,13 @@
 3. 合併後 `Deploy picture service` workflow 會部署 Worker；部署成功後打開網站任一頁，
    Cloudflare 的 Analytics Engine 頁面幾分鐘內就會看到 `samhung_site_events`。
 
-## 本機看資料（第二階段前）
+## Dashboard 的 token
+
+`GET /stats` 需要一個 Cloudflare API token（Custom token，權限只要 **Account → Account Analytics → Read**），
+存在 GitHub repo secret `CF_ANALYTICS_TOKEN`；部署 Worker 時會一併帶上 `CLOUDFLARE_ACCOUNT_ID`。
+沒設時 Dashboard 會顯示「還沒接上資料」。
+
+## 自己下 SQL
 
 Analytics Engine 可用 SQL API 查，例如過去 7 天各文章的瀏覽數：
 
