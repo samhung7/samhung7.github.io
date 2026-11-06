@@ -66,7 +66,7 @@
   font-variant: small-caps; transition: opacity var(--slow);
 }
 .card-cover.none::after { content: ""; position: absolute; inset: 10px; border: 0.5px solid var(--line); border-radius: 2px; pointer-events: none; }
-.post-card:hover .card-mono { opacity: 0.85; }
+.post-card:hover .card-mono, .project:hover .card-mono { opacity: 0.85; }
 .card-body { display: flex; flex-direction: column; gap: 10px; padding-top: 20px; }
 .card-body .label { font-variant-numeric: oldstyle-nums; }
 .post-card h3 { font-size: 1.3rem; line-height: 1.35; }
@@ -250,7 +250,7 @@ dialog.sheet .field { margin-top: 10px; }
 }
 
 /* home page: Journal */
-.journal-head { display: flex; justify-content: space-between; align-items: baseline; }
+.journal-head { display: flex; justify-content: space-between; align-items: center; }
 .more-link { transition: color var(--slow); }
 .more-link:hover { color: var(--ink); }
 .post-mini { grid-template-columns: 132px 1fr auto; padding: 36px 0; }
