@@ -10,9 +10,9 @@ const list = document.getElementById("posts"), bar = document.getElementById("ta
 let posts = null, failed = false;
 const current = () => new URLSearchParams(location.search).get("tag") || "";
 
-// list or cards, remembered on this device
+// cards (the default) or list, remembered on this device
 const VIEW_KEY = "blogView";
-let view = (() => { try { return localStorage.getItem(VIEW_KEY) === "cards" ? "cards" : "list"; } catch (e) { return "list"; } })();
+let view = (() => { try { return localStorage.getItem(VIEW_KEY) === "list" ? "list" : "cards"; } catch (e) { return "cards"; } })();
 const switcher = document.getElementById("view");
 function paintView() {
   list.classList.toggle("cards", view === "cards");
