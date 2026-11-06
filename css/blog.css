@@ -238,7 +238,6 @@ dialog.sheet .field { margin-top: 10px; }
   .ed-side { position: static; }
 }
 @media (max-width: 600px) {
-  .nav-links { gap: 6px; }
   .post-item { grid-template-columns: 1fr; gap: 8px; padding: 36px 0; }
   .post-item .arrow { display: none; }
   .ed-row { grid-template-columns: 1fr; }
@@ -247,9 +246,6 @@ dialog.sheet .field { margin-top: 10px; }
   .ed-tools { flex-wrap: nowrap; gap: 0; }
   .ed-tools .tool { min-width: 30px; padding: 0; }
   .ed-tools .btn { flex: none; padding: 0 10px; }
-}
-@media (max-width: 359px) {
-  .nav-links { gap: 2px; }
 }
 
 /* home page: Journal */

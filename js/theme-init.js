@@ -26,4 +26,10 @@ document.addEventListener('DOMContentLoaded', function () {
   nav.addEventListener('click', function (e) {
     if (e.target === nav) window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+
+  // Phones: the hamburger opens and closes the full-screen menu.
+  var menu = nav.querySelector('.menu-btn');
+  menu.addEventListener('click', function () {
+    menu.setAttribute('aria-expanded', nav.classList.toggle('open'));
+  });
 });
