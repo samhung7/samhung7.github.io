@@ -1,10 +1,29 @@
 (function () {
   var d = document.documentElement;
+
+  // The tagline is one of these quotes: a new one each day, the same for everyone on that date, in turn.
+  var quotes = [
+    { zh: '少，但更好。', en: 'Less, but better.',
+      zhBy: 'Dieter Rams，《Less but Better》，1995', enBy: 'Dieter Rams, Less but Better, 1995' },
+    { zh: '設計不只是外觀與感受，而是它如何運作。', en: 'Design is not just what it looks like and feels like. Design is how it works.',
+      zhBy: 'Steve Jobs，《紐約時報雜誌》訪談，2003', enBy: 'Steve Jobs, The New York Times Magazine, 2003' },
+    { zh: '細節不只是細節，細節成就設計。', en: 'The details are not the details. They make the design.',
+      zhBy: 'Charles Eames', enBy: 'Charles Eames' },
+    { zh: '少即是多。', en: 'Less is more.',
+      zhBy: 'Ludwig Mies van der Rohe', enBy: 'Ludwig Mies van der Rohe' },
+    { zh: '真正的創作者會把作品交出去。', en: 'Real artists ship.',
+      zhBy: 'Steve Jobs，1983', enBy: 'Steve Jobs, 1983' }
+  ];
+  var now = new Date();
+  var day = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000);
+  var quote = quotes[day % quotes.length];
+
   var strings = {
     zh: {
       title: 'Samhung Studio',
       description: 'Samhung Studio：Sam Hung 的個人工作室，收錄各項專案作品。',
-      tagline: '小而好用的工具與遊戲，從瀏覽器開始。',
+      tagline: quote.zh,
+      quoteBy: '— ' + quote.zhBy,
       projects: 'Selected Works',
       snake: '雙人貪食蛇對戰遊戲，支援 1P vs 2P、1P vs AI、AI vs AI。支援五種語言，可加入主畫面。',
       scoreboard: '比賽記分板：籃球、羽球、排球、網球、匹克球、桌球。計時、發球權、換場自動處理，內建 DJ 音效與 Spotify，支援五種語言。',
@@ -20,7 +39,8 @@
     en: {
       title: 'Samhung Studio',
       description: 'Samhung Studio: the personal studio of Sam Hung, a collection of projects.',
-      tagline: 'Small, useful tools and games, right in your browser.',
+      tagline: quote.en,
+      quoteBy: '— ' + quote.enBy,
       projects: 'Selected Works',
       snake: 'A two-player snake battle game: 1P vs 2P, 1P vs AI, or AI vs AI. Available in five languages and installable to your home screen.',
       scoreboard: 'A scoreboard for basketball, badminton, volleyball, tennis, pickleball and table tennis. Handles timing, serve and side changes automatically, with built-in DJ sounds and Spotify. Available in five languages.',
