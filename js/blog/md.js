@@ -104,3 +104,10 @@ export function readMinutes(text) {
   const words = p.replace(/[㐀-鿿豈-﫿]/g, " ").split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(cjk / 400 + words / 220));
 }
+
+// the post's first picture, for the card view's cover (null when the post has none or it isn't a safe address)
+export function cover(text) {
+  const re = /!\[[^\]]*\]\(([^)\s]+)\)/g;
+  for (let m; (m = re.exec(String(text || ""))); ) { const u = safeImg(m[1]); if (u) return u; }
+  return null;
+}
