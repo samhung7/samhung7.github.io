@@ -2,7 +2,7 @@
 const S = {
   zh: {
     blog: "Blog", blogTitle: "Blog · Samhung Studio", blogTagline: "寫給自己，也寫給路過的你。",
-    all: "全部", noPosts: "還沒有文章。", noTagPosts: "這個標籤還沒有文章。", loading: "載入中…",
+    all: "全部", viewList: "列表顯示", viewCards: "卡片顯示", noPosts: "還沒有文章。", noTagPosts: "這個標籤還沒有文章。", loading: "載入中…",
     loadFail: "載入失敗，請稍後再試。", notFound: "找不到這篇文章，可能已移除或尚未發佈。", back: "← 所有文章",
     minRead: "{n} 分鐘閱讀", notSetUp: "部落格即將開張。",
     share: "分享", copyLink: "複製連結", copied: "已複製連結", more: "更多…", copyFail: "無法複製，請手動複製網址",
@@ -28,7 +28,7 @@ const S = {
   },
   en: {
     blog: "Blog", blogTitle: "Blog · Samhung Studio", blogTagline: "Notes for myself, and for you passing by.",
-    all: "All", noPosts: "No posts yet.", noTagPosts: "No posts with this tag yet.", loading: "Loading…",
+    all: "All", viewList: "List view", viewCards: "Card view", noPosts: "No posts yet.", noTagPosts: "No posts with this tag yet.", loading: "Loading…",
     loadFail: "Couldn't load. Please try again later.", notFound: "This post doesn't exist, or isn't published yet.", back: "← All posts",
     minRead: "{n} min read", notSetUp: "The blog opens soon.",
     share: "Share", copyLink: "Copy link", copied: "Link copied", more: "More…", copyFail: "Couldn't copy. Please copy the address yourself.",

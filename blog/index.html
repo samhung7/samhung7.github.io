@@ -26,7 +26,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Sans+TC:wght@300;400&family=Noto+Sans:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css?v=fd5a4ddd0f">
-  <link rel="stylesheet" href="/css/blog.css?v=312d91b775">
+  <link rel="stylesheet" href="/css/blog.css?v=87dc5a1264">
 </head>
 <body>
   <div class="wrap">
@@ -52,8 +52,14 @@
     </header>
 
     <section class="blog-list">
-      <div class="section-head tag-bar" id="tags"></div>
-      <div id="posts" aria-live="polite"><p class="empty label" data-t="loading">載入中…</p></div>
+      <div class="section-head list-head">
+        <div class="tag-bar" id="tags"></div>
+        <div class="view-switch" id="view" role="group">
+          <button class="view-btn" type="button" data-view="list" data-t-label="viewList" aria-label="列表顯示" title="列表顯示"><svg viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg></button>
+          <button class="view-btn" type="button" data-view="cards" data-t-label="viewCards" aria-label="卡片顯示" title="卡片顯示"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/></svg></button>
+        </div>
+      </div>
+      <div id="posts" class="posts" aria-live="polite"><p class="empty label" data-t="loading">載入中…</p></div>
     </section>
 
     <footer>
@@ -64,7 +70,7 @@
       </span>
     </footer>
   </div>
-  <script type="importmap">{"imports":{"/js/blog/analytics.js":"/js/blog/analytics.js?v=eee65b2243","/js/blog/backend.js":"/js/blog/backend.js?v=0e0d19335b","/js/blog/chrome.js":"/js/blog/chrome.js?v=bdf90e7ff8","/js/blog/config.js":"/js/blog/config.js?v=c05c017258","/js/blog/dashboard.js":"/js/blog/dashboard.js?v=e7b3e8d839","/js/blog/editor.js":"/js/blog/editor.js?v=ca8fc744f2","/js/blog/i18n.js":"/js/blog/i18n.js?v=2ede3428bc","/js/blog/images.js":"/js/blog/images.js?v=489eab6acc","/js/blog/latest.js":"/js/blog/latest.js?v=ace75692e7","/js/blog/list.js":"/js/blog/list.js?v=a0f1fd370e","/js/blog/md.js":"/js/blog/md.js?v=16c8f2af21","/js/blog/post.js":"/js/blog/post.js?v=ef20bf218e","/js/blog/share.js":"/js/blog/share.js?v=a2815c8f97"}}</script>
-  <script type="module" src="/js/blog/list.js?v=a0f1fd370e"></script>
+  <script type="importmap">{"imports":{"/js/blog/analytics.js":"/js/blog/analytics.js?v=eee65b2243","/js/blog/backend.js":"/js/blog/backend.js?v=0e0d19335b","/js/blog/chrome.js":"/js/blog/chrome.js?v=bdf90e7ff8","/js/blog/config.js":"/js/blog/config.js?v=c05c017258","/js/blog/dashboard.js":"/js/blog/dashboard.js?v=e7b3e8d839","/js/blog/editor.js":"/js/blog/editor.js?v=ca8fc744f2","/js/blog/i18n.js":"/js/blog/i18n.js?v=9655ceb4b7","/js/blog/images.js":"/js/blog/images.js?v=489eab6acc","/js/blog/latest.js":"/js/blog/latest.js?v=ace75692e7","/js/blog/list.js":"/js/blog/list.js?v=aedc01e7e4","/js/blog/md.js":"/js/blog/md.js?v=e15a3a2aa2","/js/blog/post.js":"/js/blog/post.js?v=ef20bf218e","/js/blog/share.js":"/js/blog/share.js?v=a2815c8f97"}}</script>
+  <script type="module" src="/js/blog/list.js?v=aedc01e7e4"></script>
 </body>
 </html>
