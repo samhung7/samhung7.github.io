@@ -142,7 +142,7 @@ body:not(:has(.ed-tools)) nav.stuck {
 .toggle .moon { display: none; }
 :root[data-theme="dark"] .toggle .sun  { display: none; }
 :root[data-theme="dark"] .toggle .moon { display: block; }
-#theme-toggle, .mail { padding: 0; }
+#theme-toggle, .mail, .social { padding: 0; }
 
 /* Hero */
 .hero {

@@ -248,6 +248,9 @@ dialog.sheet .field { margin-top: 10px; }
   .ed-tools .tool { min-width: 30px; padding: 0; }
   .ed-tools .btn { flex: none; padding: 0 10px; }
 }
+@media (max-width: 359px) {
+  .nav-links { gap: 2px; }
+}
 
 /* home page: Journal */
 .journal-head { display: flex; justify-content: space-between; align-items: center; }
