@@ -3,12 +3,11 @@
 import { backend, off, demo, isLive, editedAt } from "./backend.js";
 import { render, excerpt, readMinutes } from "./md.js";
 import { t, fmtDate, lang } from "./i18n.js";
-import { fill, initChrome, pinNav, onLang, h, demoBanner, tagUrl } from "./chrome.js";
+import { fill, initChrome, onLang, h, demoBanner, tagUrl } from "./chrome.js";
 import { shareRow } from "./share.js";
 import { CONFIG } from "./config.js";
 
 initChrome();
-pinNav();
 if (demo) demoBanner();
 const box = document.getElementById("post");
 const slug = (location.pathname.match(/^\/blog\/([a-z0-9][a-z0-9-]{0,79})\/?$/) || [])[1];

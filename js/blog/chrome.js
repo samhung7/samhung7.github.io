@@ -20,15 +20,6 @@ export function initChrome() {
   lt.textContent = lang() === "en" ? "中" : "EN"; apply();
 }
 
-// post pages: the header is sticky (css/blog.css); once the page scrolls, mark it so it slims down with a hairline
-export function pinNav() {
-  const nav = document.querySelector(".wrap > nav");
-  if (!nav) return;
-  let on = false;
-  const check = () => { const y = window.scrollY; if (!on && y > 24) on = true; else if (on && y < 4) on = false; else return; nav.classList.toggle("stuck", on); };
-  window.addEventListener("scroll", check, { passive: true }); check();
-}
-
 let toastT = 0;
 export function toast(msg) {
   let el = document.querySelector(".toast");
