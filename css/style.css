@@ -216,28 +216,28 @@ h3 {
 .project:hover .arrow { opacity: 1; transform: translateX(0); color: var(--ink); }
 .project:hover h3 { font-style: italic; }
 
-/* Works and Journal as cards (the default) or a list: html[data-home-view], set by js/theme-init.js, switched by js/main.js */
+/* Works and Journal as cards (the default, also while html[data-home-view] isn't set yet) or a list: set by js/theme-init.js, switched by js/main.js */
 .works-head, .journal-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .head-end { display: inline-flex; align-items: center; gap: 20px; }
 .project .cover { display: none; }
-:root[data-home-view="cards"] .works { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px 28px; padding-top: 44px; }
-:root[data-home-view="cards"] .works .project { display: flex; flex-direction: column; gap: 0; padding: 0; border-bottom: 0; min-width: 0; }
-:root[data-home-view="cards"] .works .project .num,
-:root[data-home-view="cards"] .works .project .arrow { display: none; }
-:root[data-home-view="cards"] .works .project .cover {
+:root:not([data-home-view="list"]) .works { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px 28px; padding-top: 44px; }
+:root:not([data-home-view="list"]) .works .project { display: flex; flex-direction: column; gap: 0; padding: 0; border-bottom: 0; min-width: 0; }
+:root:not([data-home-view="list"]) .works .project .num,
+:root:not([data-home-view="list"]) .works .project .arrow { display: none; }
+:root:not([data-home-view="list"]) .works .project .cover {
   display: block; position: relative; width: 100%; aspect-ratio: 1200 / 630; overflow: hidden; border-radius: 4px; margin-bottom: 22px;
   border: 0.5px solid var(--line); background: color-mix(in srgb, var(--line) 28%, var(--bg));
 }
 .project .cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1); }
 .project:hover .cover img { transform: scale(1.03); }
-:root[data-home-view="cards"] .works .project .cover.none { display: flex; align-items: center; justify-content: center; }
+:root:not([data-home-view="list"]) .works .project .cover.none { display: flex; align-items: center; justify-content: center; }
 .project .cover.none::after { content: ""; position: absolute; inset: 10px; border: 0.5px solid var(--line); border-radius: 2px; pointer-events: none; }
-:root[data-home-view="cards"] .works .post-mini .num { display: block; font-size: 0.95rem; margin-bottom: 6px; }
-:root[data-home-view="cards"] .works .project h3 { font-size: 1.45rem; line-height: 1.3; margin-bottom: 10px; }
-:root[data-home-view="cards"] .works .project .desc { font-size: 0.86rem; line-height: 1.8; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-:root[data-home-view="cards"] .works .project .tag { margin-top: 14px; }
-@media (max-width: 860px) { :root[data-home-view="cards"] .works { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { :root[data-home-view="cards"] .works { grid-template-columns: 1fr; gap: 44px; padding-top: 32px; } }
+:root:not([data-home-view="list"]) .works .post-mini .num { display: block; font-size: 0.95rem; margin-bottom: 6px; }
+:root:not([data-home-view="list"]) .works .project h3 { font-size: 1.45rem; line-height: 1.3; margin-bottom: 10px; }
+:root:not([data-home-view="list"]) .works .project .desc { font-size: 0.86rem; line-height: 1.8; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+:root:not([data-home-view="list"]) .works .project .tag { margin-top: 14px; }
+@media (max-width: 860px) { :root:not([data-home-view="list"]) .works { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { :root:not([data-home-view="list"]) .works { grid-template-columns: 1fr; gap: 44px; padding-top: 32px; } }
 
 /* Footer */
 footer {

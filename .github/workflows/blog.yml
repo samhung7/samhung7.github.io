@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push: # a change to the blog's code: stamp it again (tools/stamp-assets.mjs), in case that was missed
     branches: [main]
-    paths: ["js/blog/**", "css/**"]
+    paths: ["js/**", "css/**"]
 permissions:
   contents: write
 concurrency: blog-pages
