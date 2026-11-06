@@ -65,12 +65,32 @@ a { color: inherit; text-decoration: none; }
   color: var(--muted);
 }
 
-/* Nav */
+/* Nav: stays at the top of every page (not the editor or dashboard, which have their own sticky bars), so Blog / email / 中EN / theme are always a tap away.
+   Its own ivory (or graphite) runs edge to edge; once the page scrolls it slims down and a hairline
+   appears under it (js/theme-init.js adds .stuck). The padding it gives up becomes margin, so nothing jumps. */
+html:not(:has(.editor-page)) { scroll-padding-top: 86px; }
 nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 32px 0;
+}
+body:not(.editor-page) nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  box-shadow: 0 0 0 100vmax var(--bg), 0 0.5px 0 100vmax transparent;
+  clip-path: inset(0 -100vmax -1px);
+  transition: padding var(--slow), margin var(--slow), background var(--slow), box-shadow var(--slow);
+}
+body:not(.editor-page) nav.stuck {
+  padding: 14px 0;
+  margin-bottom: 36px;
+  box-shadow: 0 0 0 100vmax var(--bg), 0 0.5px 0 100vmax var(--line);
+}
+@media (max-width: 600px) {
+  body:not(.editor-page) nav.stuck { padding: 10px 0; margin-bottom: 44px; }
 }
 
 .brand { display: inline-flex; align-items: center; gap: 14px; color: var(--heading); }
