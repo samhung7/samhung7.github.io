@@ -78,6 +78,23 @@
 @media (max-width: 860px) { .posts.cards { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .posts.cards { grid-template-columns: 1fr; gap: 44px; padding-top: 32px; } }
 
+/* post: the header stays at the top while reading, so Blog / email / 中EN / theme are always a tap away.
+   Its own ivory (or graphite) runs edge to edge; once scrolled it slims down and a hairline appears under it.
+   The slimmer padding is given back as margin, so the page never jumps. */
+html:has(#post) { scroll-padding-top: 96px; }
+body:has(#post) .wrap > nav {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--bg);
+  box-shadow: 0 0 0 100vmax var(--bg), 0 0.5px 0 100vmax transparent;
+  clip-path: inset(0 -100vmax -1px);
+  transition: padding var(--slow), margin var(--slow), background var(--slow), box-shadow var(--slow);
+}
+body:has(#post) .wrap > nav.stuck {
+  padding: 14px 0; margin-bottom: 36px;
+  box-shadow: 0 0 0 100vmax var(--bg), 0 0.5px 0 100vmax var(--line);
+}
+@media (max-width: 600px) { body:has(#post) .wrap > nav.stuck { padding: 10px 0; margin-bottom: 44px; } }
+
 /* post */
 .post { max-width: 680px; margin: 0 auto; padding: clamp(40px, 8vw, 88px) 0 120px; }
 .back { display: inline-block; margin-bottom: 48px; transition: color var(--slow); }
