@@ -21,4 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   window.addEventListener('scroll', check, { passive: true });
   check();
+
+  // A click on the nav's own empty space (between the logo and Blog), not on a link or button, glides back to the top.
+  nav.addEventListener('click', function (e) {
+    if (e.target === nav) window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 });
