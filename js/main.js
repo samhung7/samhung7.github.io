@@ -13,7 +13,9 @@
       journal: 'Journal',
       allPosts: '所有文章 →',
       privacy: '隱私權',
-      langBtn: 'EN'
+      langBtn: 'EN',
+      viewList: '列表顯示',
+      viewCards: '卡片顯示'
     },
     en: {
       title: 'Samhung Studio',
@@ -27,7 +29,9 @@
       journal: 'Journal',
       allPosts: 'All posts →',
       privacy: 'Privacy',
-      langBtn: '中'
+      langBtn: '中',
+      viewList: 'List view',
+      viewCards: 'Card view'
     }
   };
 
@@ -38,6 +42,10 @@
     d.setAttribute('lang', lang === 'en' ? 'en' : 'zh-TW');
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
       el.textContent = t[el.getAttribute('data-i18n')];
+    });
+    document.querySelectorAll('[data-i18n-label]').forEach(function (el) {
+      el.setAttribute('aria-label', t[el.getAttribute('data-i18n-label')]);
+      el.title = t[el.getAttribute('data-i18n-label')];
     });
     document.querySelector('meta[name="description"]').setAttribute('content', t.description);
     document.getElementById('lang-toggle').textContent = t.langBtn;
@@ -52,6 +60,25 @@
     setLang(lang);
     save('lang', lang);
   });
+
+  // Works and Journal: cards (the default) or list, one choice for both, remembered on this device.
+  // theme-init.js puts it on <html> before the first paint.
+  function paintView() {
+    var v = d.getAttribute('data-home-view') === 'list' ? 'list' : 'cards';
+    document.querySelectorAll('.view-btn').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-view') === v));
+    });
+  }
+  document.querySelectorAll('.view-switch').forEach(function (sw) {
+    sw.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-view]');
+      if (!b) return;
+      d.setAttribute('data-home-view', b.getAttribute('data-view'));
+      save('homeView', b.getAttribute('data-view'));
+      paintView();
+    });
+  });
+  paintView();
 
   document.getElementById('theme-toggle').addEventListener('click', function () {
     var next = d.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
