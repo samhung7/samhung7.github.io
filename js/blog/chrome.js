@@ -63,5 +63,10 @@ export const tagUrl = (tag) => "/blog/" + (tag ? "?tag=" + encodeURIComponent(ta
 export const postUrl = (slug) => "/blog/" + slug + "/";
 export const galleryUrl = (tag) => "/gallery/" + (tag ? "?tag=" + encodeURIComponent(tag) : "");
 export const photoUrl = (slug) => "/gallery/" + slug + "/";
+// links to the post or photo before and after this one: a small label with an arrow, the title under it
+const step = (x, cls, label, url) => (x ? h("a", { class: "step " + cls, href: url(x.slug) },
+  h("span", { class: "label" }, label), h("span", { class: "step-title" }, x.title)) : h("span"));
+export const steps = (prev, next, prevLabel, nextLabel, url) => (prev || next ? h("div", { class: "steps" },
+  step(prev, "prev", "← " + prevLabel, url), step(next, "next", nextLabel + " →", url)) : null);
 // replaceChildren, leaving out the nulls and falses of optional parts
 export const fill = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter((k) => k != null && k !== false));

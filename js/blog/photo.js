@@ -4,7 +4,7 @@
 import { photos, isLive } from "./photos.js";
 import { demo } from "./backend.js";
 import { t, fmtDate } from "./i18n.js";
-import { fill, initChrome, onLang, h, demoBanner, galleryUrl, photoUrl } from "./chrome.js";
+import { fill, initChrome, onLang, h, demoBanner, galleryUrl, photoUrl, steps } from "./chrome.js";
 import { shareRow } from "./share.js";
 import { CONFIG } from "./config.js";
 
@@ -18,8 +18,6 @@ let photo = null, prev = null, next = null, state = slug ? "loading" : "missing"
 
 const settings = (x) => [x.focal, x.aperture, x.shutter, x.iso].filter(Boolean).join(" · ");
 const row = (label, value) => (value ? [h("dt", { class: "label" }, label), h("dd", {}, value)] : null);
-const neighbour = (p, cls, label) => (p ? h("a", { class: "photo-step " + cls, href: photoUrl(p.slug) },
-  h("span", { class: "label" }, label), h("span", { class: "photo-step-title" }, p.title)) : h("span"));
 
 const lightbox = h("dialog", { class: "lightbox", onclick: () => lightbox.close() });
 document.body.append(lightbox);
@@ -46,7 +44,7 @@ function draw() {
         row(t("taken"), p.takenAt ? h("time", { datetime: p.takenAt.toISOString() }, fmtDate(p.takenAt)) : null),
         row(t("camera"), x.camera), row(t("lens"), x.lens), row(t("settings"), settings(x)),
         p.tags.length ? row(t("tags"), p.tags.map((tag) => h("a", { class: "chip", href: galleryUrl(tag) }, "#" + tag))) : null)),
-    prev || next ? h("div", { class: "photo-steps" }, neighbour(prev, "prev", "← " + t("prevPhoto")), neighbour(next, "next", t("nextPhoto") + " →")) : null,
+    steps(prev, next, t("prevPhoto"), t("nextPhoto"), photoUrl),
     shareRow({ url: CONFIG.site + photoUrl(p.slug), title: p.title }));
 }
 

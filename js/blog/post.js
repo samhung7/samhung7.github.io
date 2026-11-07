@@ -3,7 +3,7 @@
 import { backend, off, demo, isLive, editedAt } from "./backend.js";
 import { render, excerpt, readMinutes } from "./md.js";
 import { t, fmtDate, lang } from "./i18n.js";
-import { fill, initChrome, onLang, h, demoBanner, tagUrl } from "./chrome.js";
+import { fill, initChrome, onLang, h, demoBanner, tagUrl, postUrl, steps } from "./chrome.js";
 import { shareRow } from "./share.js";
 import { CONFIG } from "./config.js";
 
@@ -11,7 +11,7 @@ initChrome();
 if (demo) demoBanner();
 const box = document.getElementById("post");
 const slug = (location.pathname.match(/^\/blog\/([a-z0-9][a-z0-9-]{0,79})\/?$/) || [])[1];
-let post, state = slug ? "loading" : "404";
+let post, prev = null, next = null, state = slug ? "loading" : "404";
 const pre = box.querySelector(".post-body") ? box.innerHTML : null; // what the build put here, kept if the database can't be reached
 
 function setMeta(p) {
@@ -52,15 +52,21 @@ function draw() {
       live && editedAt(p) ? h("p", { class: "post-updated label" },
         h("time", { datetime: editedAt(p).toISOString() }, t("lastUpdated", { d: fmtDate(editedAt(p), true) }))) : null),
     h("div", { class: "post-body", html: render(p.body) }),
-    shareRow({ url, title: p.title }));
+    shareRow({ url, title: p.title }),
+    steps(prev, next, t("prevPost"), t("nextPost"), postUrl));
 }
 
 onLang(draw);
 draw();
 if (slug) {
   if (off) { state = "off"; draw(); }
-  else backend().then((b) => b.get(slug)).then((p) => {
+  else backend().then(async (b) => {
     // a draft or a post before its time only shows to the owner, whom the database lets read it
-    post = p; state = p ? "ok" : "missing"; draw();
-  }, (e) => { console.warn(e); state = "missing"; draw(); });
+    post = await b.get(slug);
+    if (post && isLive(post)) { // the posts published just before and just after it (the list is newest first)
+      const all = await b.listPublished(), i = all.findIndex((q) => q.slug === slug);
+      prev = all[i + 1] || null; next = all[i - 1] || null;
+    }
+    state = post ? "ok" : "missing"; draw();
+  }).catch((e) => { console.warn(e); state = "missing"; draw(); });
 }
