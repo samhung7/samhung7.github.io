@@ -116,6 +116,14 @@
 .post-body figure[class] img { width: 100%; }
 .post-body figcaption { margin-top: 10px; text-align: center; font-size: 0.8rem; color: var(--muted); }
 
+/* the post or photo before and after this one */
+.steps { display: flex; justify-content: space-between; gap: 24px; padding-top: 32px; }
+.step { display: flex; flex-direction: column; gap: 6px; max-width: 45%; transition: color var(--slow); }
+.step.next { text-align: right; margin-left: auto; }
+.step-title { font-family: var(--serif); font-size: 1.2rem; color: var(--heading); }
+.step:hover .step-title { font-style: italic; }
+.share + .steps { margin-top: 48px; border-top: 0.5px solid var(--line); } /* a post's, under its share row */
+
 /* share */
 .share { margin-top: 72px; padding-top: 28px; border-top: 0.5px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .share-btns { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -375,11 +383,6 @@ html[lang="en"] .privacy .only-zh { display: none; }
 .photo-meta dt { padding-top: 0.2em; }
 .photo-meta dd { color: var(--text); font-variant-numeric: oldstyle-nums; }
 .photo-meta dd .chip { margin: 0 6px 6px 0; height: 24px; padding: 0 10px; font-size: 0.72rem; }
-.photo-steps { display: flex; justify-content: space-between; gap: 24px; padding-top: 32px; }
-.photo-step { display: flex; flex-direction: column; gap: 6px; max-width: 45%; transition: color var(--slow); }
-.photo-step.next { text-align: right; margin-left: auto; }
-.photo-step-title { font-family: var(--serif); font-size: 1.2rem; color: var(--heading); }
-.photo-step:hover .photo-step-title { font-style: italic; }
 .photo-page .share { margin-top: 48px; }
 @media (max-width: 760px) { .photo-info { grid-template-columns: 1fr; gap: 32px; } }
 
