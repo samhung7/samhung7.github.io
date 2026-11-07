@@ -5,7 +5,7 @@
 import { backend, off, demo, isLive, editedAt } from "./backend.js";
 import { render, readMinutes, PIC_LINE, picOpts, picSpec } from "./md.js";
 import { t, fmtDate } from "./i18n.js";
-import { fill, initChrome, onLang, h, toast, demoBanner, postUrl } from "./chrome.js";
+import { fill, initChrome, onLang, h, toast, demoBanner, postUrl, confirmBox } from "./chrome.js";
 import { CONFIG } from "./config.js";
 import { uploadImage } from "./images.js";
 
@@ -30,16 +30,6 @@ function slugify(title) {
 // <input type="datetime-local"> speaks local time without a zone
 const toLocalInput = (d) => { const z = new Date(d.getTime() - d.getTimezoneOffset() * 6e4); return z.toISOString().slice(0, 16); };
 
-function confirmBox(msg, ok = t("confirm")) {
-  return new Promise((res) => {
-    const close = (v) => { dlg.close(); dlg.remove(); res(v); };
-    const dlg = h("dialog", { class: "sheet" }, h("p", {}, msg),
-      h("div", { class: "row end" }, h("button", { class: "btn", type: "button", onclick: () => close(false) }, t("cancel")),
-        h("button", { class: "btn primary", type: "button", onclick: () => close(true) }, ok)));
-    dlg.addEventListener("cancel", () => close(false));
-    document.body.append(dlg); dlg.showModal();
-  });
-}
 function promptBox(label, value = "") {
   return new Promise((res) => {
     const inp = h("input", { class: "field", type: "url", placeholder: "https://", value });

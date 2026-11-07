@@ -48,7 +48,20 @@ export function demoBanner() {
   onLang(() => { b.textContent = t("demo"); });
 }
 
+// a yes / no question in a small sheet; resolves true or false
+export function confirmBox(msg, ok = t("confirm")) {
+  return new Promise((res) => {
+    const close = (v) => { dlg.close(); dlg.remove(); res(v); };
+    const dlg = h("dialog", { class: "sheet" }, h("p", {}, msg),
+      h("div", { class: "row end" }, h("button", { class: "btn", type: "button", onclick: () => close(false) }, t("cancel")),
+        h("button", { class: "btn primary", type: "button", onclick: () => close(true) }, ok)));
+    dlg.addEventListener("cancel", () => close(false));
+    document.body.append(dlg); dlg.showModal();
+  });
+}
 export const tagUrl = (tag) => "/blog/" + (tag ? "?tag=" + encodeURIComponent(tag) : "");
 export const postUrl = (slug) => "/blog/" + slug + "/";
+export const galleryUrl = (tag) => "/gallery/" + (tag ? "?tag=" + encodeURIComponent(tag) : "");
+export const photoUrl = (slug) => "/gallery/" + slug + "/";
 // replaceChildren, leaving out the nulls and falses of optional parts
 export const fill = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter((k) => k != null && k !== false));

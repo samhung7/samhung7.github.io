@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <!-- GitHub Pages serves this for any address it has no file for. Under /blog/<slug>/ it is the post page
-       (tools/build-blog.mjs also copies it to blog/<slug>/index.html with the post filled in, for link previews);
-       anywhere else it says the page is not there. -->
+  <!-- GitHub Pages serves this for any address it has no file for. Under /blog/<slug>/ it is the post page, under
+       /gallery/<slug>/ the photo page (tools/build-blog.mjs also copies it to blog/<slug>/index.html and
+       gallery/<slug>/index.html with the post or photo filled in, for link previews); anywhere else it says the page is not there. -->
   <title>Samhung Studio</title>
   <meta name="description" content="">
   <!--og--><!-- the defaults, until tools/build-blog.mjs makes this post's own page -->
@@ -25,8 +25,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Sans+TC:wght@300;400&family=Noto+Sans:wght@300;400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=7372d4f545">
-  <link rel="stylesheet" href="/css/blog.css?v=ed86a945e3">
+  <link rel="stylesheet" href="/css/style.css?v=3477b15a6a">
+  <link rel="stylesheet" href="/css/blog.css?v=a9db1cdfce">
 </head>
 <body>
   <div class="wrap">
@@ -36,7 +36,9 @@
         <span class="wordmark">Samhung Studio</span>
       </a>
       <a class="nav-text label" href="/blog/" data-t="blog">Blog</a>
+      <a class="nav-text label nav-gallery" href="/gallery/">Gallery</a>
       <div class="nav-links">
+        <a class="menu-link label" href="/gallery/">Gallery</a>
         <a class="toggle mail" href="mailto:hello@samhungstudio.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></a>
         <a class="toggle social" href="https://www.instagram.com/samhungstudio/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none"/></svg></a>
         <a class="toggle social" href="https://www.youtube.com/@SamhungStudio" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.2v5.6l4.8-2.8z"/></svg></a>
@@ -63,7 +65,7 @@
       </span>
     </footer>
   </div>
-  <script type="importmap">{"imports":{"/js/blog/analytics.js":"/js/blog/analytics.js?v=eee65b2243","/js/blog/backend.js":"/js/blog/backend.js?v=0e0d19335b","/js/blog/chrome.js":"/js/blog/chrome.js?v=bdf90e7ff8","/js/blog/config.js":"/js/blog/config.js?v=c05c017258","/js/blog/dashboard.js":"/js/blog/dashboard.js?v=e7b3e8d839","/js/blog/editor.js":"/js/blog/editor.js?v=ca8fc744f2","/js/blog/i18n.js":"/js/blog/i18n.js?v=9655ceb4b7","/js/blog/images.js":"/js/blog/images.js?v=489eab6acc","/js/blog/latest.js":"/js/blog/latest.js?v=a57eb71c91","/js/blog/list.js":"/js/blog/list.js?v=1b7c069249","/js/blog/md.js":"/js/blog/md.js?v=e15a3a2aa2","/js/blog/post.js":"/js/blog/post.js?v=ef20bf218e","/js/blog/share.js":"/js/blog/share.js?v=a2815c8f97"}}</script>
-  <script type="module" src="/js/blog/post.js?v=ef20bf218e"></script>
+  <script type="importmap">{"imports":{"/js/blog/analytics.js":"/js/blog/analytics.js?v=eee65b2243","/js/blog/backend.js":"/js/blog/backend.js?v=d89d81847e","/js/blog/chrome.js":"/js/blog/chrome.js?v=868fea2d8e","/js/blog/config.js":"/js/blog/config.js?v=c05c017258","/js/blog/dashboard.js":"/js/blog/dashboard.js?v=e7b3e8d839","/js/blog/editor.js":"/js/blog/editor.js?v=686ba4eb7a","/js/blog/exif.js":"/js/blog/exif.js?v=28724b633f","/js/blog/gallery-editor.js":"/js/blog/gallery-editor.js?v=f31d836704","/js/blog/gallery.js":"/js/blog/gallery.js?v=cdcd9a3c29","/js/blog/i18n.js":"/js/blog/i18n.js?v=1df95800a1","/js/blog/images.js":"/js/blog/images.js?v=23fb061fca","/js/blog/latest.js":"/js/blog/latest.js?v=a57eb71c91","/js/blog/list.js":"/js/blog/list.js?v=1b7c069249","/js/blog/md.js":"/js/blog/md.js?v=e15a3a2aa2","/js/blog/photo.js":"/js/blog/photo.js?v=5df304709a","/js/blog/photos.js":"/js/blog/photos.js?v=fed1fcce7d","/js/blog/post.js":"/js/blog/post.js?v=ef20bf218e","/js/blog/share.js":"/js/blog/share.js?v=a2815c8f97"}}</script>
+  <script type="module">import(location.pathname.startsWith("/gallery/") ? "/js/blog/photo.js" : "/js/blog/post.js");</script>
 </body>
 </html>

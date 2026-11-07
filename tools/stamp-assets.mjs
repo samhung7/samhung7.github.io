@@ -15,9 +15,10 @@ const mods = fs.readdirSync(path.join(ROOT, "js/blog")).filter((f) => f.endsWith
 const ver = Object.fromEntries([...mods, "/css/style.css", "/css/blog.css", "/js/main.js", "/js/theme-init.js"].map((u) => [u, v(u.slice(1))]));
 const map = `<script type="importmap">${JSON.stringify({ imports: Object.fromEntries(mods.map((u) => [u, `${u}?v=${ver[u]}`])) })}</script>`;
 
-const pages = ["index.html", "404.html", "blog/index.html", "blog/editor/index.html", "blog/dashboard/index.html", "privacy/index.html"];
-for (const d of fs.readdirSync(path.join(ROOT, "blog"), { withFileTypes: true })) {
-  const f = path.join("blog", d.name, "index.html");
+const pages = ["index.html", "404.html", "blog/index.html", "blog/editor/index.html", "blog/dashboard/index.html", "privacy/index.html",
+  "gallery/index.html", "gallery/editor/index.html"];
+for (const dir of ["blog", "gallery"]) for (const d of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
+  const f = path.join(dir, d.name, "index.html");
   if (d.isDirectory() && fs.existsSync(path.join(ROOT, f)) && fs.readFileSync(path.join(ROOT, f), "utf8").includes(MARK)) pages.push(f);
 }
 for (const rel of pages) {

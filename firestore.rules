@@ -1,6 +1,6 @@
 rules_version = '2';
-// The blog (js/blog/). Anyone may read a post once it's published and its time has come; only the owner reads drafts
-// and scheduled posts, and only the owner writes. OWNER_UID: the id the editor shows after the first Google sign-in
+// The blog and the gallery (js/blog/). Anyone may read a post or a photo once it's published and its time has come; only
+// the owner reads drafts and scheduled ones, and only the owner writes. OWNER_UID: the id the editor shows after the first Google sign-in
 // (also ownerUid in js/blog/config.js). Deploy: firebase deploy --only firestore
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -13,6 +13,26 @@ service cloud.firestore {
         && d.status in ['draft', 'published']
         && (d.publishAt == null || d.publishAt is timestamp)
         && (d.status == 'draft' || d.publishAt is timestamp);
+    }
+    function validPhoto(d) {
+      return d.keys().hasOnly(['title', 'description', 'tags', 'takenAt', 'exif', 'image', 'thumb', 'width', 'height',
+                               'status', 'publishAt', 'order', 'createdAt', 'updatedAt'])
+        && d.title is string && d.title.size() <= 120
+        && d.description is string && d.description.size() <= 5000
+        && d.tags is list && d.tags.size() <= 10
+        && (d.takenAt == null || d.takenAt is timestamp)
+        && d.exif is map && d.exif.size() <= 6
+        && d.image is string && d.thumb is string
+        && d.width is number && d.height is number && d.order is number
+        && d.status in ['draft', 'published']
+        && (d.publishAt == null || d.publishAt is timestamp)
+        && (d.status == 'draft' || (d.publishAt is timestamp && d.title.size() > 0));
+    }
+    match /photos/{slug} {
+      allow read: if isOwner()
+        || (resource.data.status == 'published' && resource.data.publishAt <= request.time);
+      allow create, update: if isOwner() && slug.matches('^[a-z0-9][a-z0-9-]{0,79}$') && validPhoto(request.resource.data);
+      allow delete: if isOwner();
     }
     match /posts/{slug} {
       allow read: if isOwner()

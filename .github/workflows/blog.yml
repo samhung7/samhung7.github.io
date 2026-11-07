@@ -1,4 +1,4 @@
-# Static pages for published blog posts (link previews, search), and sitemap.xml. See tools/build-blog.mjs.
+# Static pages for published blog posts and gallery photos (link previews, search), and sitemap.xml. See tools/build-blog.mjs.
 name: Blog pages
 on:
   schedule:
@@ -22,10 +22,10 @@ jobs:
       - run: node tools/build-blog.mjs
       - name: Commit if anything changed
         run: |
-          git add -A blog sitemap.xml index.html 404.html
+          git add -A blog gallery sitemap.xml index.html 404.html
           if git diff --cached --quiet; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Blog: refresh post pages"
+          git commit -m "Blog: refresh post and photo pages"
           git pull --rebase
           git push
