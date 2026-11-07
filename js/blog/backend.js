@@ -14,7 +14,7 @@ export const demo = qd != null ? qd !== "0" : ss === "1";
 export const configured = !!CONFIG.firebase;
 export const off = !configured && !demo; // no Firebase yet, and not trying the demo: the blog says it opens soon
 
-const toDate = (v) => (v == null ? null : v instanceof Date ? v : typeof v.toDate === "function" ? v.toDate() : new Date(v));
+export const toDate = (v) => (v == null ? null : v instanceof Date ? v : typeof v.toDate === "function" ? v.toDate() : new Date(v));
 const norm = (slug, d) => d && ({ slug, title: d.title || "", body: d.body || "", tags: Array.isArray(d.tags) ? d.tags : [],
   status: d.status === "published" ? "published" : "draft", publishAt: toDate(d.publishAt), createdAt: toDate(d.createdAt), updatedAt: toDate(d.updatedAt) });
 // last edited, when that came after it went out (a scheduled post edited before its time counts as not edited)
@@ -22,10 +22,13 @@ export const editedAt = (p) => (p.updatedAt && p.publishAt && p.updatedAt - p.pu
 export const isLive = (p, now = Date.now()) => p.status === "published" && p.publishAt && p.publishAt.getTime() <= now;
 
 /* ---------- Firestore ---------- */
+// the Firebase app, started once and shared with the gallery (photos.js)
+let fbReady = null;
+export const firebase = () => (fbReady ||= Promise.all([import(FB + "firebase-app.js"), import(FB + "firebase-auth.js"), import(FB + "firebase-firestore.js")])
+  .then(([{ initializeApp }, A, F]) => { const app = initializeApp(CONFIG.firebase); return { A, F, auth: A.getAuth(app), db: F.getFirestore(app) }; }));
+
 async function firebaseBackend() {
-  const [{ initializeApp }, A, F] = await Promise.all([import(FB + "firebase-app.js"), import(FB + "firebase-auth.js"), import(FB + "firebase-firestore.js")]);
-  const app = initializeApp(CONFIG.firebase);
-  const auth = A.getAuth(app), db = F.getFirestore(app);
+  const { A, F, auth, db } = await firebase();
   const col = F.collection(db, "posts");
   let user = null;
   const authReady = new Promise((res) => A.onAuthStateChanged(auth, (u) => { user = u; res(); }));

@@ -145,9 +145,11 @@ body:not(:has(.ed-tools)) nav.stuck {
 :root[data-theme="dark"] .toggle .moon { display: block; }
 #theme-toggle, .mail, .social { padding: 0; }
 
-/* Phones: Blog stays in the bar; the icons fold into a full-screen menu behind a hairline hamburger (js/theme-init.js toggles nav.open). */
-.menu-btn { display: none; }
+/* Phones: Blog stays in the bar; Gallery and the icons fold into a full-screen menu behind a hairline hamburger (js/theme-init.js toggles nav.open). */
+.menu-btn, .menu-link { display: none; }
 @media (max-width: 600px) {
+  .nav-gallery { display: none; }
+  .menu-link { display: block; flex-basis: 100%; text-align: center; margin-bottom: 18px; font-size: 0.8rem; color: var(--heading); }
   .brand, .nav-text { position: relative; z-index: 21; } /* logo, Blog and hamburger stay above the open menu */
   body:not(:has(.ed-tools)) nav.open { clip-path: none; } /* the sticky nav's clip would cut the menu to the bar */
   .menu-btn {

@@ -3,25 +3,32 @@
 import { backend } from "./backend.js";
 
 const EDGE = 2000, MAX = 1.2 * 1024 * 1024;
-export async function shrink(file, edge = EDGE, maxBytes = MAX) {
+export async function loadImage(file) {
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
-    const W = img.naturalWidth, H = img.naturalHeight;
-    if (!W || !H) throw new Error("no-size");
-    let q = 0.85;
-    for (let n = 0; ; n++) {
-      const s = Math.min(1, edge / Math.max(W, H)), w = Math.max(1, Math.round(W * s)), h = Math.max(1, Math.round(H * s));
-      const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
-      const cx = cv.getContext("2d");
-      cx.fillStyle = "#fff"; cx.fillRect(0, 0, w, h); // a transparent PNG gets a white background, not a black one
-      cx.drawImage(img, 0, 0, w, h);
-      const blob = await new Promise((ok) => cv.toBlob(ok, "image/jpeg", q));
-      if (!blob) throw new Error("encode");
-      if (blob.size <= maxBytes || n >= 6) return new Uint8Array(await blob.arrayBuffer());
-      if (q > 0.7) q -= 0.08; else edge = Math.round(edge * 0.8); // a little lower quality first, then smaller
-    }
+    if (!img.naturalWidth || !img.naturalHeight) throw new Error("no-size");
+    return img;
   } finally { URL.revokeObjectURL(url); }
+}
+// a loaded picture → JPEG bytes no longer than edge on its long side and no bigger than maxBytes, with its size
+export async function encode(img, edge = EDGE, maxBytes = MAX) {
+  const W = img.naturalWidth, H = img.naturalHeight;
+  let q = 0.85;
+  for (let n = 0; ; n++) {
+    const s = Math.min(1, edge / Math.max(W, H)), w = Math.max(1, Math.round(W * s)), h = Math.max(1, Math.round(H * s));
+    const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+    const cx = cv.getContext("2d");
+    cx.fillStyle = "#fff"; cx.fillRect(0, 0, w, h); // a transparent PNG gets a white background, not a black one
+    cx.drawImage(img, 0, 0, w, h);
+    const blob = await new Promise((ok) => cv.toBlob(ok, "image/jpeg", q));
+    if (!blob) throw new Error("encode");
+    if (blob.size <= maxBytes || n >= 6) return { bytes: new Uint8Array(await blob.arrayBuffer()), width: w, height: h };
+    if (q > 0.7) q -= 0.08; else edge = Math.round(edge * 0.8); // a little lower quality first, then smaller
+  }
+}
+export async function shrink(file, edge = EDGE, maxBytes = MAX) {
+  return (await encode(await loadImage(file), edge, maxBytes)).bytes;
 }
 export async function hashName(bytes) {
   const d = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));

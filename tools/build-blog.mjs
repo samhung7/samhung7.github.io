@@ -1,8 +1,9 @@
-/* Makes a static page for each published post, blog/<slug>/index.html, so link previews (LINE, Facebook, X, Threads)
-   and search engines see its title, description and text without running JavaScript. Each is 404.html with the post
-   filled in; the page's own script still loads the live version. Also writes sitemap.xml, and removes the pages of
-   posts that are gone or back to drafts. Run by .github/workflows/blog.yml every 30 minutes, or: node tools/build-blog.mjs
-   A post is readable before its page exists: 404.html serves every /blog/<slug>/ address until then. */
+/* Makes a static page for each published post, blog/<slug>/index.html, and each published photo, gallery/<slug>/index.html,
+   so link previews (LINE, Facebook, X, Threads) and search engines see its title, description, picture and text without
+   running JavaScript. Each is 404.html with the post or photo filled in; the page's own script still loads the live
+   version. Also writes sitemap.xml, and removes the pages of posts and photos that are gone or back to drafts.
+   Run by .github/workflows/blog.yml every 30 minutes, or: node tools/build-blog.mjs
+   A post or photo is readable before its page exists: 404.html serves every /blog/<slug>/ and /gallery/<slug>/ address until then. */
 import fs from "node:fs";
 import path from "node:path";
 import { CONFIG } from "../js/blog/config.js";
@@ -15,31 +16,60 @@ if (!CONFIG.firebase) { console.log("js/blog/config.js has no Firebase config ye
 // Firestore's REST API, unsigned: the rules let anyone read what's published and due, and nothing else
 const { projectId, apiKey } = CONFIG.firebase;
 const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery?key=${apiKey}`;
-const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ structuredQuery: {
-  from: [{ collectionId: "posts" }],
-  where: { compositeFilter: { op: "AND", filters: [
-    { fieldFilter: { field: { fieldPath: "status" }, op: "EQUAL", value: { stringValue: "published" } } },
-    { fieldFilter: { field: { fieldPath: "publishAt" }, op: "LESS_THAN_OR_EQUAL", value: { timestampValue: new Date(Date.now() - 60e3).toISOString() } } },
-  ] } },
-  orderBy: [{ field: { fieldPath: "publishAt" }, direction: "DESCENDING" }],
-} }) });
-if (!res.ok) {
-  const why = await res.text();
-  // the rules not deployed yet, or the index still building: nothing to build yet, and not worth a failed run every 30 minutes
-  if (/PERMISSION_DENIED|FAILED_PRECONDITION/.test(why)) { console.log(`::warning::Firestore ${res.status}: rules or index not ready yet`); process.exit(0); }
-  throw new Error(`Firestore ${res.status}: ${why}`);
-}
 const val = (v) => v == null ? null : "stringValue" in v ? v.stringValue : "timestampValue" in v ? new Date(v.timestampValue)
-  : "arrayValue" in v ? (v.arrayValue.values || []).map(val) : null;
-const posts = (await res.json()).filter((r) => r.document).map(({ document: d }) => ({
-  slug: d.name.split("/").pop(), title: val(d.fields.title) || "", body: val(d.fields.body) || "", tags: val(d.fields.tags) || [],
-  publishAt: val(d.fields.publishAt), updatedAt: val(d.fields.updatedAt) || new Date(d.updateTime),
-})).filter((p) => /^[a-z0-9][a-z0-9-]{0,79}$/.test(p.slug));
+  : "integerValue" in v ? +v.integerValue : "doubleValue" in v ? v.doubleValue
+  : "arrayValue" in v ? (v.arrayValue.values || []).map(val)
+  : "mapValue" in v ? Object.fromEntries(Object.entries(v.mapValue.fields || {}).map(([k, x]) => [k, val(x)])) : null;
+// every published, due document of a collection, newest first, as { slug, ...fields }; null when Firestore isn't ready for it
+async function published(collectionId) {
+  const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ structuredQuery: {
+    from: [{ collectionId }],
+    where: { compositeFilter: { op: "AND", filters: [
+      { fieldFilter: { field: { fieldPath: "status" }, op: "EQUAL", value: { stringValue: "published" } } },
+      { fieldFilter: { field: { fieldPath: "publishAt" }, op: "LESS_THAN_OR_EQUAL", value: { timestampValue: new Date(Date.now() - 60e3).toISOString() } } },
+    ] } },
+    orderBy: [{ field: { fieldPath: "publishAt" }, direction: "DESCENDING" }],
+  } }) });
+  if (!res.ok) {
+    const why = await res.text();
+    // the rules not deployed yet, or the index still building: nothing to build yet, and not worth a failed run every 30 minutes
+    if (/PERMISSION_DENIED|FAILED_PRECONDITION/.test(why)) { console.log(`::warning::Firestore ${collectionId} ${res.status}: rules or index not ready yet`); return null; }
+    throw new Error(`Firestore ${res.status}: ${why}`);
+  }
+  return (await res.json()).filter((r) => r.document).map(({ document: d }) => ({
+    slug: d.name.split("/").pop(), updateTime: new Date(d.updateTime), ...Object.fromEntries(Object.entries(d.fields).map(([k, v]) => [k, val(v)])),
+  })).filter((p) => /^[a-z0-9][a-z0-9-]{0,79}$/.test(p.slug));
+}
+
+const postDocs = await published("posts");
+if (!postDocs) process.exit(0);
+const posts = postDocs.map((d) => ({ slug: d.slug, title: d.title || "", body: d.body || "", tags: d.tags || [], publishAt: d.publishAt, updatedAt: d.updatedAt || d.updateTime }));
+const photos = ((await published("photos")) || []).sort((a, b) => (b.order || 0) - (a.order || 0));
 
 const tpl = fs.readFileSync(path.join(ROOT, "404.html"), "utf8");
 const day = (d) => new Intl.DateTimeFormat("zh-TW", { year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Taipei" }).format(d);
 const dayTime = (d) => new Intl.DateTimeFormat("zh-TW", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Taipei" }).format(d);
-const keep = new Set();
+// 404.html with this page's title, description, link-preview tags and content; written only when it changed
+function write(dir, slug, { title, desc, og, content, box }) {
+  let html = tpl.replace("<!DOCTYPE html>", "<!DOCTYPE html>\n" + MARK)
+    .replace(/<title>.*?<\/title>/, `<title>${esc(title)} · Samhung Studio</title>`)
+    .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc(desc)}">`)
+    .replace(/<!--og-->[\s\S]*?<!--\/og-->/, og.join("\n  ")).replace("<!--post-->", content);
+  if (box) html = html.replace('<article class="post" id="post">', `<article class="${box}" id="post">`);
+  const file = path.join(ROOT, dir, slug, "index.html");
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  if (!fs.existsSync(file) || fs.readFileSync(file, "utf8") !== html) { fs.writeFileSync(file, html); console.log("wrote", dir + "/" + slug); }
+}
+// pages this script made for what isn't out any more
+function prune(dir, keep) {
+  for (const d of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
+    const f = path.join(ROOT, dir, d.name, "index.html");
+    if (d.isDirectory() && !keep.has(d.name) && fs.existsSync(f) && fs.readFileSync(f, "utf8").includes(MARK)) {
+      fs.rmSync(path.join(ROOT, dir, d.name), { recursive: true }); console.log("removed", dir + "/" + d.name);
+    }
+  }
+}
+
 for (const p of posts) {
   const edited = p.updatedAt - p.publishAt > 60e3 ? p.updatedAt : null; // same rule as editedAt in js/blog/backend.js
   const link = `${CONFIG.site}/blog/${p.slug}/`, desc = excerpt(p.body, 150), img = p.body.match(/!\[[^\]]*\]\((https:\/\/[^)\s]+)\)/)?.[1];
@@ -53,32 +83,47 @@ for (const p of posts) {
     `<meta property="article:modified_time" content="${p.updatedAt.toISOString()}">`,
     ...p.tags.map((t) => `<meta property="article:tag" content="${esc(t)}">`),
     `<meta name="twitter:card" content="summary_large_image">`,
-  ].join("\n  ");
-  const article = `<a class="label back" href="/blog/">← 所有文章</a>
+  ];
+  const content = `<a class="label back" href="/blog/">← 所有文章</a>
         <header class="post-head"><h1>${esc(p.title)}</h1>
           <p class="post-meta label"><time datetime="${p.publishAt.toISOString()}">${day(p.publishAt)}</time><span class="dot">${readMinutes(p.body)} 分鐘閱讀</span>${p.tags.map((t) => `<a class="dot" href="/blog/?tag=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("")}</p>${edited ? `
           <p class="post-updated label"><time datetime="${edited.toISOString()}">最近更新 ${dayTime(edited)}</time></p>` : ""}
         </header>
         <div class="post-body">${render(p.body)}</div>`;
-  const html = tpl.replace("<!DOCTYPE html>", "<!DOCTYPE html>\n" + MARK)
-    .replace(/<title>.*?<\/title>/, `<title>${esc(p.title)} · Samhung Studio</title>`)
-    .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc(desc)}">`)
-    .replace(/<!--og-->[\s\S]*?<!--\/og-->/, og).replace("<!--post-->", article);
-  const dir = path.join(ROOT, "blog", p.slug), file = path.join(dir, "index.html");
-  fs.mkdirSync(dir, { recursive: true });
-  if (!fs.existsSync(file) || fs.readFileSync(file, "utf8") !== html) { fs.writeFileSync(file, html); console.log("wrote", p.slug); }
-  keep.add(p.slug);
+  write("blog", p.slug, { title: p.title, desc, og, content });
 }
-// pages this script made for posts that aren't out any more
-for (const d of fs.readdirSync(path.join(ROOT, "blog"), { withFileTypes: true })) {
-  const f = path.join(ROOT, "blog", d.name, "index.html");
-  if (d.isDirectory() && !keep.has(d.name) && fs.existsSync(f) && fs.readFileSync(f, "utf8").includes(MARK)) {
-    fs.rmSync(path.join(ROOT, "blog", d.name), { recursive: true }); console.log("removed", d.name);
-  }
+prune("blog", new Set(posts.map((p) => p.slug)));
+
+for (const p of photos) {
+  const link = `${CONFIG.site}/gallery/${p.slug}/`, x = p.exif || {}, title = p.title || "Gallery";
+  const desc = (p.description || "").replace(/\s+/g, " ").slice(0, 150) || [x.camera, x.lens].filter(Boolean).join(" · ");
+  const og = [
+    `<link rel="canonical" href="${esc(link)}">`,
+    `<meta property="og:type" content="article">`, `<meta property="og:site_name" content="Samhung Studio">`,
+    `<meta property="og:title" content="${esc(title)}">`, `<meta property="og:description" content="${esc(desc)}">`,
+    `<meta property="og:url" content="${esc(link)}">`, `<meta property="og:image" content="${esc(p.image)}">`,
+    `<meta property="og:image:width" content="${p.width}">`, `<meta property="og:image:height" content="${p.height}">`,
+    `<meta property="article:published_time" content="${p.publishAt.toISOString()}">`,
+    ...(p.tags || []).map((t) => `<meta property="article:tag" content="${esc(t)}">`),
+    `<meta name="twitter:card" content="summary_large_image">`,
+  ];
+  const settings = [x.focal, x.aperture, x.shutter, x.iso].filter(Boolean).join(" · ");
+  const row = (label, v) => (v ? `<dt class="label">${label}</dt><dd>${v}</dd>` : "");
+  const content = `<a class="label back" href="/gallery/">← Gallery</a>
+        <figure class="photo-hero"><button class="photo-zoom" type="button"><img src="${esc(p.image)}" alt="${esc(p.title)}" width="${p.width}" height="${p.height}"></button></figure>
+        <div class="photo-info">
+          <div class="photo-text"><h1>${esc(p.title)}</h1>${p.description ? `<p class="photo-desc">${esc(p.description)}</p>` : ""}</div>
+          <dl class="photo-meta">${row("拍攝日期", p.takenAt ? `<time datetime="${p.takenAt.toISOString()}">${day(p.takenAt)}</time>` : "")}${row("相機", esc(x.camera))}${row("鏡頭", esc(x.lens))}${row("參數", esc(settings))}${
+            (p.tags || []).length ? row("標籤", p.tags.map((t) => `<a class="chip" href="/gallery/?tag=${encodeURIComponent(t)}">#${esc(t)}</a>`).join("")) : ""}</dl>
+        </div>`;
+  write("gallery", p.slug, { title, desc, og, content, box: "photo-page" });
 }
-const urls = [["/", null], ["/blog/", posts[0]?.updatedAt], ...posts.map((p) => [`/blog/${p.slug}/`, p.updatedAt])];
+prune("gallery", new Set(photos.map((p) => p.slug)));
+
+const urls = [["/", null], ["/blog/", posts[0]?.updatedAt], ...posts.map((p) => [`/blog/${p.slug}/`, p.updatedAt]),
+  ["/gallery/", photos[0]?.updateTime], ...photos.map((p) => [`/gallery/${p.slug}/`, p.updateTime])];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([u, d]) =>
   `  <url><loc>${CONFIG.site}${u}</loc>${d ? `<lastmod>${d.toISOString().slice(0, 10)}</lastmod>` : ""}</url>`).join("\n")}\n</urlset>\n`;
 const sm = path.join(ROOT, "sitemap.xml");
 if (!fs.existsSync(sm) || fs.readFileSync(sm, "utf8") !== sitemap) fs.writeFileSync(sm, sitemap);
-console.log(posts.length, "published posts");
+console.log(posts.length, "published posts,", photos.length, "published photos");
