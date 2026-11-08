@@ -13,7 +13,9 @@ import { fill, initChrome, onLang, h, toast, demoBanner, photoUrl, confirmBox } 
 initChrome();
 if (demo) demoBanner();
 const app = document.getElementById("app");
-let B, P, me, all = [], view = () => {}, dirty = false;
+let B, P, me, all = [], view = () => {}, dirty = false, drag = null; // drag: the thumbnail being moved in the list
+// a finger dragging a photo doesn't scroll the page
+app.addEventListener("touchmove", (e) => { if (drag?.on) e.preventDefault(); }, { passive: false });
 
 const statusOf = (p) => (p.status === "draft" ? "drafts" : isLive(p) ? "published" : "scheduled");
 const slugOk = (s) => /^[a-z0-9][a-z0-9-]{0,79}$/.test(s) && s !== "editor";
@@ -88,12 +90,13 @@ async function upload(files) {
 /* ---------- the list, in the gallery's order; drag a thumbnail to move it ---------- */
 async function list() {
   dirty = false;
-  let tab = sessionStorage.getItem("gallery-tab") || "all", dragging = null;
+  let tab = sessionStorage.getItem("gallery-tab") || "all";
   try { all = await P.listAll(); } catch (e) { console.warn(e); return fill(app, h("p", { class: "empty" }, t("loadFail"))); }
 
   // the moved photo takes an order between its new neighbours'
-  async function move(slug, before) {
+  async function move(slug, { before }) {
     const rest = all.filter((p) => p.slug !== slug), i = before ? rest.findIndex((p) => p.slug === before) : rest.length;
+    if (i === all.findIndex((p) => p.slug === slug)) return; // put back where it was
     const above = rest[i - 1], below = rest[i], p = all.find((x) => x.slug === slug);
     const order = !above ? below.order + 1000 : !below ? above.order - 1000 : (above.order + below.order) / 2;
     p.order = order; rest.splice(i, 0, p); all = rest; view();
@@ -102,27 +105,80 @@ async function list() {
   }
 
   function tile(p) {
-    const s = statusOf(p), drag = tab === "all";
-    const el = h("a", { class: "ed-photo", href: "#/edit/" + p.slug, draggable: drag ? "true" : "false" },
+    const s = statusOf(p), movable = tab === "all";
+    const el = h("a", { class: "ed-photo" + (movable ? " movable" : ""), href: "#/edit/" + p.slug, draggable: "false", "data-slug": p.slug,
+      onclick: (e) => { if (drag?.moved) e.preventDefault(); } }, // the click that ends a drag doesn't open the photo
       h("span", { class: "ed-photo-pic" }, h("img", { src: p.thumb, alt: "", loading: "lazy", draggable: "false" })),
       h("span", { class: "status " + s }, t(s)),
       h("span", { class: "ed-photo-title" }, p.title || t("untitled")));
-    if (!drag) return el;
-    // dropped on the left half: goes before this one; on the right half: after it
-    const side = (e) => (e.offsetX < el.offsetWidth / 2 ? "before" : "after");
-    el.addEventListener("dragstart", (e) => { dragging = p.slug; e.dataTransfer.effectAllowed = "move"; el.classList.add("dragging"); });
-    el.addEventListener("dragend", () => { dragging = null; el.classList.remove("dragging"); });
-    el.addEventListener("dragover", (e) => { if (!dragging || dragging === p.slug) return; e.preventDefault(); el.dataset.drop = side(e); });
-    el.addEventListener("dragleave", () => { delete el.dataset.drop; });
-    el.addEventListener("drop", (e) => {
-      e.preventDefault(); delete el.dataset.drop;
-      if (!dragging || dragging === p.slug) return;
-      const i = all.findIndex((x) => x.slug === p.slug), before = side(e) === "before" ? p.slug : all[i + 1]?.slug;
-      if (before !== dragging) move(dragging, before === undefined ? null : before);
-    });
+    if (movable) el.addEventListener("pointerdown", (e) => press(e, p.slug, el));
     return el;
   }
 
+  /* Dragging a thumbnail, as StoaTalk's sticky notes: with a mouse it follows as soon as it moves; with a finger after
+     holding it still for a moment (a quick swipe scrolls the page instead). A copy follows the pointer, the photo itself
+     fades where it was, and a line shows where it will land: before the photo under the pointer if on its left half,
+     after it otherwise. Near the top or bottom of the screen the page scrolls. */
+  const HOLD = 350, SLOP = 8, EDGE = 80;
+  function press(e, slug, el) {
+    if (e.button > 0) return;
+    const touch = e.pointerType !== "mouse";
+    const d = drag = { slug, el, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, pid: e.pointerId, on: false, moved: false, timer: 0, raf: 0, ghost: null, at: null };
+    if (touch) d.timer = setTimeout(() => { if (drag === d) begin(d); }, HOLD);
+    const moveTo = (m) => {
+      if (m.pointerId !== d.pid) return;
+      d.x = m.clientX; d.y = m.clientY;
+      if (!d.on) { if (Math.hypot(d.x - d.x0, d.y - d.y0) <= SLOP) return; if (touch) return finish(false); begin(d); }
+      m.preventDefault(); place(d);
+    };
+    const up = (u) => { if (u.pointerId === d.pid) finish(u.type === "pointerup"); };
+    const finish = (drop) => {
+      clearTimeout(d.timer); cancelAnimationFrame(d.raf);
+      removeEventListener("pointermove", moveTo); removeEventListener("pointerup", up); removeEventListener("pointercancel", up);
+      d.ghost?.remove(); el.classList.remove("dragging"); mark(null);
+      if (d.on && drop && d.at) move(d.slug, d.at);
+      d.on = false;
+      setTimeout(() => { if (drag === d) drag = null; }, 0);
+    };
+    addEventListener("pointermove", moveTo, { passive: false });
+    addEventListener("pointerup", up); addEventListener("pointercancel", up);
+  }
+  function begin(d) {
+    d.on = d.moved = true;
+    const r = d.el.getBoundingClientRect();
+    d.dx = d.x0 - r.left; d.dy = d.y0 - r.top;
+    d.ghost = d.el.cloneNode(true);
+    d.ghost.classList.add("ed-ghost");
+    d.ghost.style.width = r.width + "px";
+    document.body.append(d.ghost);
+    d.el.classList.add("dragging");
+    navigator.vibrate?.(10);
+    place(d);
+    const tick = () => {
+      if (!d.on) return;
+      if (d.y < EDGE) scrollBy(0, -10); else if (d.y > innerHeight - EDGE / 2) scrollBy(0, 10);
+      place(d); d.raf = requestAnimationFrame(tick);
+    };
+    d.raf = requestAnimationFrame(tick);
+  }
+  function mark(on, side) {
+    app.querySelectorAll(".ed-photo[data-drop]").forEach((x) => delete x.dataset.drop);
+    if (on) on.dataset.drop = side;
+  }
+  // where it would land, as { before: <slug> | null (the end) }, with a line on the photo next to it
+  function place(d) {
+    d.ghost.style.transform = `translate(${d.x - d.dx}px, ${d.y - d.dy}px) rotate(2deg)`;
+    const under = document.elementFromPoint(d.x, d.y), grid = under?.closest(".ed-photos");
+    if (!grid || under.closest(".dragging")) { d.at = null; return mark(null); } // off the list, or still on its own place
+    const tiles = [...grid.querySelectorAll(".ed-photo:not(.dragging)")];
+    // on a photo: its left or right half; between photos: before the first one it's above, or after the last
+    const on = under.closest(".ed-photo:not(.dragging)") || tiles.find((n) => { const r = n.getBoundingClientRect(); return d.y < r.top || (d.y < r.bottom && d.x < r.left); });
+    if (!on) { d.at = { before: null }; return mark(tiles.at(-1), "after"); }
+    const r = on.getBoundingClientRect(), before = !under.closest(".ed-photo") || d.x < r.left + r.width / 2;
+    const i = tiles.indexOf(on);
+    d.at = { before: before ? on.dataset.slug : tiles[i + 1]?.dataset.slug ?? null };
+    mark(on, before ? "before" : "after");
+  }
   view = () => {
     const n = (k) => all.filter((p) => k === "all" || statusOf(p) === k).length;
     const shown = all.filter((p) => tab === "all" || statusOf(p) === tab);

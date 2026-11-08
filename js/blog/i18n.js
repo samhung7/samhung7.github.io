@@ -29,7 +29,7 @@ const S = {
     gallery: "Gallery", galleryTitle: "Gallery · Samhung Studio", galleryTagline: "用鏡頭留下的片刻。", noPhotos: "還沒有照片。", noTagPhotos: "這個標籤還沒有照片。",
     photoNotFound: "找不到這張照片，可能已移除或尚未發佈。", backGallery: "← Gallery", prevPhoto: "上一張", nextPhoto: "下一張", prevPost: "上一篇", nextPost: "下一篇", enlarge: "放大",
     taken: "拍攝日期", camera: "相機", lens: "鏡頭", focal: "焦距", aperture: "光圈", shutter: "快門", iso: "ISO", settings: "參數",
-    photos: "照片", uploadPhotos: "上傳照片", uploadingN: "上傳中 {i} / {n}…", dragHint: "拖曳縮圖可以調整在 Gallery 的順序", orderSaved: "已更新順序",
+    photos: "照片", uploadPhotos: "上傳照片", uploadingN: "上傳中 {i} / {n}…", dragHint: "拖曳縮圖可以調整在 Gallery 的順序（手機請先長按再拖曳）", orderSaved: "已更新順序",
     descPh: "說明（可留空）", needPhotoTitle: "發佈前請先輸入標題", photoDelAsk: "確定要刪除「{t}」嗎？刪除後無法復原。", exifNote: "上傳時自動從照片讀取，可以修改。",
   },
   en: {
@@ -59,7 +59,7 @@ const S = {
     gallery: "Gallery", galleryTitle: "Gallery · Samhung Studio", galleryTagline: "Moments, kept in light.", noPhotos: "No photos yet.", noTagPhotos: "No photos with this tag yet.",
     photoNotFound: "This photo doesn't exist, or isn't published yet.", backGallery: "← Gallery", prevPhoto: "Previous", nextPhoto: "Next", prevPost: "Previous", nextPost: "Next", enlarge: "Enlarge",
     taken: "Taken", camera: "Camera", lens: "Lens", focal: "Focal length", aperture: "Aperture", shutter: "Shutter", iso: "ISO", settings: "Settings",
-    photos: "Photos", uploadPhotos: "Upload photos", uploadingN: "Uploading {i} / {n}…", dragHint: "Drag a thumbnail to change its place in the gallery", orderSaved: "Order updated",
+    photos: "Photos", uploadPhotos: "Upload photos", uploadingN: "Uploading {i} / {n}…", dragHint: "Drag a thumbnail to change its place in the gallery (on a phone, hold it first)", orderSaved: "Order updated",
     descPh: "Description (optional)", needPhotoTitle: "Add a title before publishing", photoDelAsk: "Delete “{t}”? This can't be undone.", exifNote: "Read from the photo when uploaded; edit as you like.",
   },
 };

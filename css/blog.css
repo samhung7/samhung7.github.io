@@ -400,8 +400,10 @@ dialog.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .ed-hint { margin: 20px 0 0; }
 .ed-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 28px 18px; padding: 24px 0 96px; }
 .ed-photo { display: flex; flex-direction: column; gap: 8px; min-width: 0; position: relative; }
-.ed-photo[draggable="true"] { cursor: grab; }
+.ed-photo.movable { cursor: grab; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .ed-photo.dragging { opacity: 0.35; }
+.ed-ghost { position: fixed; left: 0; top: 0; z-index: 40; pointer-events: none; cursor: grabbing; padding: 8px; margin: -8px; border-radius: 4px;
+  background: var(--bg); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16); box-sizing: content-box; }
 .ed-photo[data-drop]::before { content: ""; position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); }
 .ed-photo[data-drop="before"]::before { left: -10px; }
 .ed-photo[data-drop="after"]::before { right: -10px; }
