@@ -100,7 +100,7 @@
 .post-body a { border-bottom: 0.5px solid var(--muted); transition: border-color var(--slow), color var(--slow); }
 .post-body a:hover { color: var(--ink); border-color: var(--ink); }
 .post-body ul, .post-body ol { padding-left: 1.4em; }
-.post-body li + li { margin-top: 0.3em; }
+.post-body li + li, .post-body li > ul, .post-body li > ol { margin-top: 0.3em; }
 .post-body blockquote { border-left: 0.5px solid var(--ink); padding: 0.1em 0 0.1em 1.4em; font-family: var(--serif); font-size: 1.2rem; font-style: italic; color: var(--heading); }
 .post-body hr { border: 0; text-align: center; height: 1em; }
 .post-body hr::after { content: "·  ·  ·"; white-space: pre; color: var(--muted); font-family: var(--serif); font-size: 1.2rem; letter-spacing: 0.3em; }

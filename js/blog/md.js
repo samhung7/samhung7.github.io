@@ -2,7 +2,7 @@
    Every piece of the author's text is escaped; only the tags below are ever produced, and links/images
    keep only http(s), mailto and same-site addresses. Like StoaTalk's long posts, plus ### headings,
    *italics*, `code`, ``` code blocks, [links](url) and ![pictures](url).
-   Blocks: # ## ### headings, > quotes, - and 1. lists, --- rules, ``` fences, ![alt](url) on its own line, else paragraphs.
+   Blocks: # ## ### headings, > quotes, - and 1. lists (an indented item sits in a list under the item above), --- rules, ``` fences, ![alt](url) on its own line, else paragraphs.
    A picture on its own line may end with its size and place: ![alt](url){50% left} — 30%, 50% or 75% of the column
    (else all of it), and left, center (the default) or right. */
 
@@ -43,13 +43,28 @@ export function inline(src) {
   return out + esc(s.slice(last));
 }
 
+// one list item: a deeper indent opens a list inside the item above, a shallower one closes lists back to its level
+function addItem(list, indent, tag, start, html) {
+  const open = list.open;
+  while (open.length && open.at(-1).indent > indent) list.html += `</li></${open.pop().tag}>`;
+  const top = open.at(-1);
+  if (top && top.indent === indent && top.tag === tag) list.html += "</li>";
+  else {
+    if (top && top.indent === indent) list.html += `</li></${open.pop().tag}>`; // a different kind of list at the same level
+    // a numbered list counts on from its first number, so one picked up after a picture or a paragraph keeps its numbers
+    list.html += `<${tag}${start > 1 ? ` start="${start}"` : ""}>`;
+    open.push({ tag, indent });
+  }
+  list.html += `<li>${html}`;
+}
+
 export function render(text) {
   const lines = String(text || "").replace(/\r\n?/g, "\n").split("\n");
   const out = [];
   let para = null, list = null, quote = null;
   const end = () => {
     if (para) out.push(`<p>${para.join("<br>")}</p>`);
-    if (list) out.push(`<${list.tag}${list.start > 1 ? ` start="${list.start}"` : ""}>${list.items.map((x) => `<li>${x}</li>`).join("")}</${list.tag}>`);
+    if (list) out.push(list.html + list.open.reverse().map((l) => `</li></${l.tag}>`).join(""));
     if (quote) out.push(`<blockquote><p>${quote.join("<br>")}</p></blockquote>`);
     para = list = quote = null;
   };
@@ -75,12 +90,10 @@ export function render(text) {
       if (!quote) { end(); quote = []; }
       quote.push(inline(x[1])); continue;
     }
-    const li = m.match(/^[-*]\s+(.*)$/), ol = !li && m.match(/^(\d{1,3})[.)]\s+(.*)$/);
-    if (li || ol) {
-      const tag = li ? "ul" : "ol";
-      // a numbered list counts on from its first number, so one picked up after a picture or a paragraph keeps its numbers
-      if (!list || list.tag !== tag) { end(); list = { tag, items: [], start: ol ? +ol[1] : 1 }; }
-      list.items.push(inline(li ? li[1] : ol[2])); continue;
+    if ((x = line.match(/^(\s*)(?:[-*]|(\d{1,3})[.)])\s+(.*)$/))) {
+      if (!list) { end(); list = { html: "", open: [] }; }
+      addItem(list, x[1].replace(/\t/g, "    ").length, x[2] ? "ol" : "ul", +x[2], inline(x[3]));
+      continue;
     }
     if (!para) { end(); para = []; }
     para.push(inline(line));
