@@ -2,7 +2,8 @@
    Every piece of the author's text is escaped; only the tags below are ever produced, and links/images
    keep only http(s), mailto and same-site addresses. Like StoaTalk's long posts, plus ### headings,
    *italics*, `code`, ``` code blocks, [links](url) and ![pictures](url).
-   Blocks: # ## ### headings, > quotes, - and 1. lists (an indented item sits in a list under the item above), --- rules, ``` fences, ![alt](url) on its own line, else paragraphs.
+   Blocks: # ## ### headings, > quotes, - and 1. lists (an indented item sits in a list under the item above), --- rules, ``` fences, ![alt](url) on its own line,
+   | tables | (a header row, then a row of --- with : for alignment: :--- left, :---: center, ---: right), else paragraphs.
    A picture on its own line may end with its size and place: ![alt](url){50% left} — 30%, 50% or 75% of the column
    (else all of it), and left, center (the default) or right. */
 
@@ -58,6 +59,16 @@ function addItem(list, indent, tag, start, html) {
   list.html += `<li>${html}`;
 }
 
+// a table: the cells of a | row |, a \| inside a cell being a plain |
+const cells = (row) => row.replace(/^\|/, "").replace(/(?<!\\)\|$/, "").split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|"));
+const ALIGN_ROW = /^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?$/;
+const align = (c) => (/^:-+:$/.test(c) ? "center" : /-:$/.test(c) ? "right" : "left");
+
+function table(head, aligns, rows) {
+  const row = (r, tag) => `<tr>${aligns.map((a, j) => `<${tag}${a === "left" ? "" : ` style="text-align:${a}"`}>${inline(r[j] ?? "")}</${tag}>`).join("")}</tr>`;
+  return `<div class="table"><table><thead>${row(head, "th")}</thead><tbody>${rows.map((r) => row(r, "td")).join("")}</tbody></table></div>`;
+}
+
 export function render(text) {
   const lines = String(text || "").replace(/\r\n?/g, "\n").split("\n");
   const out = [];
@@ -86,6 +97,13 @@ export function render(text) {
       if (u) out.push(`<figure${o.w ? ` class="w${o.w} al-${o.a}"` : ""}><img src="${esc(u)}" alt="${esc(x[1])}" loading="lazy">${x[1] ? `<figcaption>${esc(x[1])}</figcaption>` : ""}</figure>`);
       continue;
     }
+    if (m.includes("|") && (lines[i + 1] || "").includes("|") && ALIGN_ROW.test(lines[i + 1].trim())) {
+      end();
+      const head = cells(m), aligns = cells(lines[++i].trim()).map(align), rows = [];
+      while (lines[i + 1]?.trim().includes("|")) rows.push(cells(lines[++i].trim()));
+      out.push(table(head, aligns, rows));
+      continue;
+    }
     if ((x = m.match(/^>\s?(.*)$/))) {
       if (!quote) { end(); quote = []; }
       quote.push(inline(x[1])); continue;
@@ -104,7 +122,8 @@ export function render(text) {
 
 // the words without the marks: for excerpts, share text and meta descriptions
 export const plain = (text) => String(text || "").replace(/```[\s\S]*?```/g, " ").split("\n").map((l) => l.trim())
-  .filter((l) => l && !PIC_LINE.test(l) && !/^(-{3,}|\*{3,})$/.test(l))
+  .filter((l) => l && !PIC_LINE.test(l) && !/^(-{3,}|\*{3,})$/.test(l) && !(l.includes("|") && ALIGN_ROW.test(l)))
+  .map((l) => (l.startsWith("|") ? cells(l).join(" ") : l))
   .map((l) => l.replace(/^(#{1,3}\s+|>\s?|[-*]\s+|\d{1,3}[.)]\s+)/, "").replace(/!\[[^\]]*\]\([^)]*\)/g, "")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").replace(/`([^`]+)`/g, "$1"))
   .join(" ").replace(/\s+/g, " ").trim();
