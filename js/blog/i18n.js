@@ -25,6 +25,7 @@ const S = {
     cancel: "取消", confirm: "確定", linkUrl: "連結網址", imageUrl: "圖片網址",
     picWidth: "圖片寬度", picFull: "滿版", picAlign: "對齊", pic_left: "置左", pic_center: "置中", pic_right: "置右",
     uploading: "圖片上傳中…", uploadFail: "圖片上傳失敗",
+    importMd: "匯入 Markdown 檔（.md，也可以直接拖進來）", importAsk: "要用「{f}」取代目前的內文嗎？", importDo: "匯入", imported: "已匯入「{f}」",
     // gallery
     gallery: "Gallery", galleryTitle: "Gallery · Samhung Studio", galleryTagline: "用鏡頭留下的片刻。", noPhotos: "還沒有照片。", noTagPhotos: "這個標籤還沒有照片。",
     photoNotFound: "找不到這張照片，可能已移除或尚未發佈。", backGallery: "← Gallery", prevPhoto: "上一張", nextPhoto: "下一張", prevPost: "上一篇", nextPost: "下一篇", enlarge: "放大",
@@ -56,6 +57,7 @@ const S = {
     cancel: "Cancel", confirm: "OK", linkUrl: "Link address", imageUrl: "Image address",
     picWidth: "Width", picFull: "Full", picAlign: "Align", pic_left: "Left", pic_center: "Center", pic_right: "Right",
     uploading: "Uploading picture…", uploadFail: "Couldn't upload the picture",
+    importMd: "Import a Markdown file (.md, or drop one in)", importAsk: "Replace the current text with “{f}”?", importDo: "Import", imported: "Imported “{f}”",
     gallery: "Gallery", galleryTitle: "Gallery · Samhung Studio", galleryTagline: "Moments, kept in light.", noPhotos: "No photos yet.", noTagPhotos: "No photos with this tag yet.",
     photoNotFound: "This photo doesn't exist, or isn't published yet.", backGallery: "← Gallery", prevPhoto: "Previous", nextPhoto: "Next", prevPost: "Previous", nextPost: "Next", enlarge: "Enlarge",
     taken: "Taken", camera: "Camera", lens: "Lens", focal: "Focal length", aperture: "Aperture", shutter: "Shutter", iso: "ISO", settings: "Settings",

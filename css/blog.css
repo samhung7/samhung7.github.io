@@ -252,7 +252,7 @@ dialog.sheet .field { margin-top: 10px; }
   .ed-tags { grid-column: auto; }
   .share { flex-direction: column; align-items: flex-start; }
   .ed-tools { flex-wrap: nowrap; gap: 0; }
-  .ed-tools .tool { min-width: 30px; padding: 0; }
+  .ed-tools .tool { min-width: 26px; padding: 0; }
   .ed-tools .btn { flex: none; padding: 0 10px; }
 }
 
