@@ -167,6 +167,7 @@ function editor(p) {
   // pictures: from the toolbar, pasted, or dropped on the text. Each gets a line saying it's on its way, swapped for
   // the real one when the upload is done (or taken out if it fails)
   const file = h("input", { type: "file", accept: "image/*", multiple: true, hidden: true });
+  const isMd = (f) => /\.(md|markdown)$/i.test(f.name);
   let upN = 0;
   async function addImages(files) {
     files = [...files].filter((f) => f.type.startsWith("image/"));
@@ -187,7 +188,31 @@ function editor(p) {
   ta.addEventListener("paste", (e) => { const f = [...(e.clipboardData?.files || [])]; if (f.some((x) => x.type.startsWith("image/"))) { e.preventDefault(); addImages(f); } });
   ta.addEventListener("dragover", (e) => { if ([...(e.dataTransfer?.items || [])].some((i) => i.kind === "file")) { e.preventDefault(); ta.classList.add("drop"); } });
   ta.addEventListener("dragleave", () => ta.classList.remove("drop"));
-  ta.addEventListener("drop", (e) => { ta.classList.remove("drop"); const f = [...(e.dataTransfer?.files || [])]; if (f.length) { e.preventDefault(); addImages(f); } });
+  ta.addEventListener("drop", (e) => {
+    ta.classList.remove("drop"); const f = [...(e.dataTransfer?.files || [])], md = f.find(isMd);
+    if (md) { e.preventDefault(); importMd(md); } else if (f.length) { e.preventDefault(); addImages(f); }
+  });
+  // a Markdown file (from the toolbar, or dropped on the text) becomes the post's text. A "# " first line is taken out of
+  // the text as the title (the front matter's title:, if there is one, comes first); the front matter's tags: are added
+  const mdFile = h("input", { type: "file", accept: ".md,.markdown,text/markdown", hidden: true });
+  mdFile.addEventListener("change", () => { const f = mdFile.files[0]; mdFile.value = ""; if (f) importMd(f); });
+  async function importMd(f) {
+    if (ta.value.trim() && !(await confirmBox(t("importAsk", { f: f.name }), t("importDo")))) return;
+    let text = (await f.text()).replace(/\r\n?/g, "\n"), T = "", tags = [];
+    const fm = text.match(/^---\n([\s\S]*?)\n---(\n|$)/);
+    if (fm) {
+      text = text.slice(fm[0].length);
+      const unquote = (v) => v.trim().replace(/^["']|["']$/g, "").trim();
+      T = unquote(fm[1].match(/^title:(.*)$/m)?.[1] || "");
+      tags = (fm[1].match(/^tags:(.*)$/m)?.[1] || "").replace(/[[\]]/g, "").split(",").map(unquote).filter(Boolean);
+    }
+    const h1 = text.match(/^\s*# (.+)\n?/);
+    if (h1) { T ||= h1[1].trim(); text = text.slice(h1[0].length); }
+    if (T) title.value = T.slice(0, 120);
+    s.tags = [...new Set([...s.tags, ...tags.map((x) => x.replace(/^#/, "").slice(0, 30))])].slice(0, 10); drawTags();
+    ta.value = text.replace(/^\s*\n/, ""); ta.selectionStart = ta.selectionEnd = 0;
+    changed(); ta.focus(); toast(t("imported", { f: f.name }));
+  }
   const ico = (d) => { const e = document.createElementNS("http://www.w3.org/2000/svg", "svg"); e.setAttribute("viewBox", "0 0 24 24"); e.innerHTML = d; return e; };
   const tool = (label, txt, fn, cls = "") => h("button", { type: "button", class: "tool " + cls, "aria-label": t(label), title: t(label), "data-tool": "1", onclick: fn }, txt);
   const prevBtn = h("button", { type: "button", class: "btn small", onclick: togglePreview }, t("preview"));
@@ -225,6 +250,7 @@ function editor(p) {
     tool("heading", "H", () => prefix("## ")), tool("list", "•", () => prefix("- ")), tool("numList", "1.", () => prefix("1. ")),
     tool("quote", "❝", () => prefix("> ")), tool("code", "</>", () => wrap("`", "`", "code")), tool("link", ico('<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'), () => link(false)),
     tool("image", ico('<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 18 5.5-5 4 3.5 2.5-2 4 3.5"/>'), () => file.click()),
+    tool("importMd", ico('<path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4"/><path d="M12.5 10.5v6.5m-2.75-2.75 2.75 2.75 2.75-2.75"/>'), () => mdFile.click()),
     h("span", { class: "grow" }), prevBtn, picBar);
   function togglePreview() {
     previewing = !previewing;
@@ -287,7 +313,7 @@ function editor(p) {
       h("div", { class: "row" }, p ? h("span", { class: "status " + statusOf(p) }, t(statusOf(p))) : null,
         p && p.status === "published" ? h("a", { class: "btn small", href: postUrl(p.slug), target: "_blank" }, t("view")) : null)),
     h("div", { class: "ed-grid" },
-      h("div", { class: "ed-main" }, title, toolbar, ta, pv, file, h("div", { class: "ed-foot" }, count, note,
+      h("div", { class: "ed-main" }, title, toolbar, ta, pv, file, mdFile, h("div", { class: "ed-foot" }, count, note,
         restored ? h("button", { class: "linkish label", type: "button", onclick: async (e) => {
           store.set(LOCAL(p?.slug), null); e.target.remove(); title.value = orig.title; ta.value = orig.body; s.tags = [...orig.tags]; slugIn.value = orig.slug; drawTags(); changed(); dirty = false; note.textContent = "";
         } }, t("localDrop")) : null)),
